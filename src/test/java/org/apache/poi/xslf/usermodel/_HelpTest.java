@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public class _HelpTest {
 
-    private static final String PATH = _HelpTest.class.getResource("/").getFile();
+    public static final String PATH = _HelpTest.class.getResource("/").getFile();
 
     @Test
     public void copeTable() throws IOException {

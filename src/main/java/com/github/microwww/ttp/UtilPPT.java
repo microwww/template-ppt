@@ -1,11 +1,15 @@
 package com.github.microwww.ttp;
 
+import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.util.Units;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xslf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -20,6 +24,32 @@ public class UtilPPT {
 
     public static XSLFTableRow copeTableRow(XSLFTable table, XSLFTableRow src) {
         return _Help.copyTableRow(table, src);
+    }
+
+    /**
+     * @param slide
+     * @param index from 0
+     * @return maybe null
+     */
+    public static XSLFChart findChart(XSLFSlide slide, int index) {
+        int i = 0;
+        for (POIXMLDocumentPart part : slide.getRelations()) {
+            if (part instanceof XSLFChart) {
+                if (i == index) {
+                    return (XSLFChart) part;
+                }
+                i++;
+            }
+        }
+        return null; //throw new IllegalStateException("chart not found in the template");
+    }
+
+    private static int px2point(double px) {
+        return (int) (Math.rint(px * Units.EMU_PER_POINT));
+    }
+
+    public static Rectangle rectanglePx2point(Rectangle2D px) {
+        return new Rectangle(px2point(px.getX()), px2point(px.getY()), px2point(px.getWidth()), px2point(px.getHeight()));
     }
 
     public static void setBarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[] values1, Double[] values2) {
