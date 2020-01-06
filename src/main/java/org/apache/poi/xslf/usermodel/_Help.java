@@ -1,18 +1,29 @@
 package org.apache.poi.xslf.usermodel;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.poi.ooxml.POIXMLDocumentPart;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.Units;
+import org.apache.xmlbeans.XmlCursor;
+import org.apache.xmlbeans.XmlObject;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTGraphicalObjectData;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTableCell;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTableRow;
+import org.openxmlformats.schemas.presentationml.x2006.main.CTGraphicalObjectFrame;
 
+import javax.xml.namespace.QName;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 
 public class _Help {
 
-    public static XSLFTable copeTable(XSLFSlide slide, XSLFTable src) {
+    public static XSLFTable copyTable(XSLFSlide slide, XSLFTable src) {
         XSLFTable dest = slide.createTable();
         dest.getCTTable().set(src.getCTTable().copy());
-        slide.getShapes(); // this.initDrawingAndShapes();
-        dest.setAnchor(src.getAnchor());
 
         List<CTTableRow> tr = dest.getCTTable().getTrList();
         for (CTTableRow row : tr) {
@@ -25,6 +36,7 @@ public class _Help {
             }
             dest.updateRowColIndexes();
         }
+        dest.copy(src);
         return dest;
     }
 
@@ -42,5 +54,87 @@ public class _Help {
             }
         }
         return row;
+    }
+
+    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest) {
+        Map.Entry<XSLFGraphicFrame, XSLFChart> position = findChartWithPosition(src, index);
+        if (position != null) {
+            XSLFChart from = position.getValue();
+            XSLFChart to = dest.getSlideShow().createChart();
+            dest.addChart(to, rectanglePx2point(position.getKey().getAnchor()));
+            try {// https://github.com/apache/poi/blob/bb2ad49a2fc6c74948f8bb92701807093b525586/src/examples/src/org/apache/poi/xslf/usermodel/ChartFromScratch.java
+                to.importContent(from);
+                to.setWorkbook(from.getWorkbook());
+            } catch (IOException | InvalidFormatException e) {
+                throw new RuntimeException(e);
+            }
+            return to;
+        }
+        return null;
+    }
+
+    /**
+     * @param slide
+     * @param index from 0
+     * @return maybe null
+     */
+    public static XSLFChart findChart(XSLFSlide slide, int index) {
+        int i = 0;
+        for (POIXMLDocumentPart part : slide.getRelations()) {
+            if (part instanceof XSLFChart) {
+                if (i == index) {
+                    return (XSLFChart) part;
+                }
+                i++;
+            }
+        }
+        return null; //throw new IllegalStateException("chart not found in the template");
+    }
+
+    // copy from  XSLFGraphicFrame.copy
+    public static Map.Entry<XSLFGraphicFrame, XSLFChart> findChartWithPosition(XSLFSlide src, int index) {
+        int i = 0;
+        for (XSLFShape sh : src.getShapes()) {
+            if (sh instanceof XSLFGraphicFrame) {
+                XSLFGraphicFrame frame = (XSLFGraphicFrame) sh;
+                CTGraphicalObjectData data = ((CTGraphicalObjectFrame) frame.getXmlObject()).getGraphic().getGraphicData();
+                String uri = data.getUri();
+                if (uri.endsWith("/chart")) {
+                    if (i == index) {
+                        XSLFChart chart = findChart(frame);
+                        return new AbstractMap.SimpleEntry<>(frame, chart);
+                    }
+                    i++;
+                }
+            }
+        }
+        return null;
+    }
+
+    // copy from  XSLFGraphicFrame.copy
+    public static XSLFChart findChart(XSLFGraphicFrame srcShape) {
+        CTGraphicalObjectData objData = ((CTGraphicalObjectFrame) srcShape.getXmlObject()).getGraphic().getGraphicData();
+        XSLFSheet src = srcShape.getSheet();
+        String xpath = "declare namespace c='http://schemas.openxmlformats.org/drawingml/2006/chart' c:chart";
+        XmlObject[] obj = objData.selectPath(xpath);
+        if (obj != null && obj.length == 1) {
+            XmlCursor c = obj[0].newCursor();
+            try {
+                QName idQualifiedName = new QName("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id");
+                String id = c.getAttributeText(idQualifiedName);
+                return (XSLFChart) src.getRelationById(id);
+            } finally {
+                c.dispose();
+            }
+        }
+        throw new RuntimeException("Not find chart AT xpath : " + xpath);
+    }
+
+    private static int px2point(double px) {
+        return (int) (Math.rint(px * Units.EMU_PER_POINT));
+    }
+
+    public static Rectangle rectanglePx2point(Rectangle2D px) {
+        return new Rectangle(px2point(px.getX()), px2point(px.getY()), px2point(px.getWidth()), px2point(px.getHeight()));
     }
 }

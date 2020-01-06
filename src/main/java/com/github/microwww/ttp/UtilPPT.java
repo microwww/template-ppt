@@ -2,7 +2,6 @@ package com.github.microwww.ttp;
 
 import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.util.Units;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xslf.usermodel.*;
 import org.slf4j.Logger;
@@ -18,11 +17,11 @@ public class UtilPPT {
 
     private static final Logger log = LoggerFactory.getLogger(UtilPPT.class);
 
-    public static XSLFTable copeTable(XSLFSlide slide, XSLFTable src) {
-        return _Help.copeTable(slide, src);
+    public static XSLFTable copyTable(XSLFSlide slide, XSLFTable src) {
+        return _Help.copyTable(slide, src);
     }
 
-    public static XSLFTableRow copeTableRow(XSLFTable table, XSLFTableRow src) {
+    public static XSLFTableRow copyTableRow(XSLFTable table, XSLFTableRow src) {
         return _Help.copyTableRow(table, src);
     }
 
@@ -44,12 +43,8 @@ public class UtilPPT {
         return null; //throw new IllegalStateException("chart not found in the template");
     }
 
-    private static int px2point(double px) {
-        return (int) (Math.rint(px * Units.EMU_PER_POINT));
-    }
-
     public static Rectangle rectanglePx2point(Rectangle2D px) {
-        return new Rectangle(px2point(px.getX()), px2point(px.getY()), px2point(px.getWidth()), px2point(px.getHeight()));
+        return _Help.rectanglePx2point(px);
     }
 
     public static void setBarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[] values1, Double[] values2) {
