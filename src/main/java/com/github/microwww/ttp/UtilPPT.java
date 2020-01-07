@@ -1,6 +1,5 @@
 package com.github.microwww.ttp;
 
-import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xslf.usermodel.*;
@@ -23,6 +22,10 @@ public class UtilPPT {
 
     public static XSLFTableRow copyTableRow(XSLFTable table, XSLFTableRow src) {
         return _Help.copyTableRow(table, src);
+    }
+
+    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest) {
+        return _Help.copyChart(src, index, dest);
     }
 
     /**
