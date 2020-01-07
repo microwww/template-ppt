@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class _Help {
 
@@ -57,11 +58,18 @@ public class _Help {
     }
 
     public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest) {
+        return copyChart(src, index, dest, (c, v) -> {
+            dest.addChart(c, rectanglePx2point(v.getKey().getAnchor(), 0, 0, 0, 0));
+        });
+    }
+
+    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest, BiConsumer<XSLFChart, Map.Entry<XSLFGraphicFrame, XSLFChart>> fun) {
         Map.Entry<XSLFGraphicFrame, XSLFChart> position = findChartWithPosition(src, index);
         if (position != null) {
             XSLFChart from = position.getValue();
             XSLFChart to = dest.getSlideShow().createChart();
-            dest.addChart(to, rectanglePx2point(position.getKey().getAnchor()));
+            fun.accept(to, position);
+            //dest.addChart(to, rectanglePx2point(position.getKey().getAnchor(), delta.x, delta.y, delta.width, delta.height));
             try {// https://github.com/apache/poi/blob/bb2ad49a2fc6c74948f8bb92701807093b525586/src/examples/src/org/apache/poi/xslf/usermodel/ChartFromScratch.java
                 to.importContent(from);
                 to.setWorkbook(from.getWorkbook());
@@ -130,11 +138,7 @@ public class _Help {
         throw new RuntimeException("Not find chart AT xpath : " + xpath);
     }
 
-    private static int px2point(double px) {
-        return (int) (Math.rint(px * Units.EMU_PER_POINT));
-    }
-
-    public static Rectangle rectanglePx2point(Rectangle2D px) {
-        return new Rectangle(px2point(px.getX()), px2point(px.getY()), px2point(px.getWidth()), px2point(px.getHeight()));
+    public static Rectangle rectanglePx2point(Rectangle2D px, double x, double y, double w, double h) {
+        return new Rectangle(Units.toEMU(px.getX() + x), Units.toEMU(px.getY() + y), Units.toEMU(px.getWidth() + w), Units.toEMU(px.getHeight() + h));
     }
 }

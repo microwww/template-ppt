@@ -26,6 +26,19 @@ public class Tools {
         return _Help.copyChart(src, index, dest);
     }
 
+    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest, Rectangle2D delta) {
+        return _Help.copyChart(src, index, dest, (chart, val) -> {
+            dest.addChart(chart, rectanglePx2point(val.getKey().getAnchor(), delta.getX(), delta.getY(), delta.getWidth(), delta.getHeight()));
+        });
+    }
+
+    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest, Rectangle position) {
+        return _Help.copyChart(src, index, dest, (chart, val) -> {
+            dest.addChart(chart, position); //rectanglePx2point(val.getKey().getAnchor(), 0, 0, 0, 0));
+        });
+    }
+
+
     /**
      * @param slide
      * @param index from 0
@@ -36,7 +49,15 @@ public class Tools {
     }
 
     public static Rectangle rectanglePx2point(Rectangle2D px) {
-        return _Help.rectanglePx2point(px);
+        return _Help.rectanglePx2point(px, px.getX(), px.getY(), px.getWidth(), px.getHeight());
+    }
+
+    public static Rectangle2D delta(Rectangle2D px, double x, double y, double w, double h) {
+        return new Rectangle2D.Double(px.getX() + x, px.getY() + y, px.getWidth() + w, px.getHeight() + h);
+    }
+
+    public static Rectangle rectanglePx2point(Rectangle2D px, double x, double y, double w, double h) {
+        return _Help.rectanglePx2point(px, x, y, w, h);
     }
 
     public static void setBarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[] values1, Double[] values2) {

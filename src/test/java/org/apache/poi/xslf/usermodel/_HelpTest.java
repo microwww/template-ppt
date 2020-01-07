@@ -57,7 +57,9 @@ public class _HelpTest {
         target.createSlide().importContent(template.getSlides().get(0));
 
         XSLFSlide slide = target.createSlide();
-        XSLFChart chart = _Help.copyChart(template.getSlides().get(0), 0, slide);
+        XSLFChart chart = _Help.copyChart(template.getSlides().get(0), 0, slide, (c, val) -> {
+            slide.addChart(c, _Help.rectanglePx2point(val.getKey().getAnchor(), 0, 0, 0, 0));
+        });
         Assert.assertNotNull(chart);
 
         target.write(new FileOutputStream(new File(PATH, UUID.randomUUID().toString() + ".pptx")));
