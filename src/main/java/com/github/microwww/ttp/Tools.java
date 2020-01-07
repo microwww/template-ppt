@@ -8,13 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-public class UtilPPT {
+public class Tools {
 
-    private static final Logger log = LoggerFactory.getLogger(UtilPPT.class);
+    private static final Logger log = LoggerFactory.getLogger(Tools.class);
 
     public static XSLFTable copyTable(XSLFSlide slide, XSLFTable src) {
         return _Help.copyTable(slide, src);
@@ -80,18 +78,5 @@ public class UtilPPT {
         firstSeries.setTitle(chartTitle, chart.setSheetTitle(chartTitle, 0));
         // firstSeries.setExplosion(25);
         chart.plot(pie);
-    }
-
-    public static File createCanWriteDirection(File file) throws IOException {
-        if (!file.exists()) {
-            if (!file.mkdirs()) {
-                log.warn("Make dir error ! {} ", file.getCanonicalPath());
-            }
-        }
-        if (!file.canWrite()) {
-            throw new IOException("Can not to write file to : " + file.getCanonicalFile());
-        }
-        file.mkdirs();
-        return file;
     }
 }
