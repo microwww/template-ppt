@@ -89,11 +89,10 @@ public class ToolsTest {
 
         XSLFAutoShape from = (XSLFAutoShape) tmp.getShapes().get(0);
         XSLFSlide slide = target.createSlide(tmp.getSlideLayout());
-        Rectangle2D pst = from.getAnchor();
+        Rectangle2D position = from.getAnchor();
         for (int i = 0; i < 3; i++) {
-            XSLFAutoShape shape = slide.createAutoShape();
-            Rectangle2D.Double rectangle = new Rectangle2D.Double(pst.getX(), pst.getY() + pst.getHeight() * i, pst.getWidth(), pst.getHeight());
-            shape.getXmlObject().set(from.getXmlObject().copy());
+            XSLFAutoShape shape = Tools.copyAutoShape(slide, from);
+            Rectangle2D.Double rectangle = new Rectangle2D.Double(position.getX(), position.getY() + position.getHeight() * i, position.getWidth(), position.getHeight());
             shape.setAnchor(rectangle);
         }
 

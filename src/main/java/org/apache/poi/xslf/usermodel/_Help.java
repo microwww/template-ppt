@@ -22,8 +22,8 @@ import java.util.function.BiConsumer;
 
 public class _Help {
 
-    public static XSLFTable copyTable(XSLFSlide slide, XSLFTable src) {
-        XSLFTable dest = slide.createTable();
+    public static XSLFTable copyTable(XSLFSheet sheet, XSLFTable src) {
+        XSLFTable dest = sheet.createTable();
         dest.getCTTable().set(src.getCTTable().copy());
 
         List<CTTableRow> tr = dest.getCTTable().getTrList();
@@ -57,13 +57,14 @@ public class _Help {
         return row;
     }
 
-    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest) {
+    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest) {
         return copyChart(src, index, dest, (c, v) -> {
-            dest.addChart(c, rectanglePx2point(v.getKey().getAnchor(), 0, 0, 0, 0));
+            Rectangle point = rectanglePx2point(v.getKey().getAnchor(), 0, 0, 0, 0);
+            dest.addChart(c, point);
         });
     }
 
-    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest, BiConsumer<XSLFChart, Map.Entry<XSLFGraphicFrame, XSLFChart>> fun) {
+    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest, BiConsumer<XSLFChart, Map.Entry<XSLFGraphicFrame, XSLFChart>> fun) {
         Map.Entry<XSLFGraphicFrame, XSLFChart> position = findChartWithPosition(src, index);
         if (position != null) {
             XSLFChart from = position.getValue();
@@ -86,7 +87,7 @@ public class _Help {
      * @param index from 0
      * @return maybe null
      */
-    public static XSLFChart findChart(XSLFSlide slide, int index) {
+    public static XSLFChart findChart(XSLFSheet slide, int index) {
         int i = 0;
         for (POIXMLDocumentPart part : slide.getRelations()) {
             if (part instanceof XSLFChart) {
@@ -100,7 +101,7 @@ public class _Help {
     }
 
     // copy from  XSLFGraphicFrame.copy
-    public static Map.Entry<XSLFGraphicFrame, XSLFChart> findChartWithPosition(XSLFSlide src, int index) {
+    public static Map.Entry<XSLFGraphicFrame, XSLFChart> findChartWithPosition(XSLFSheet src, int index) {
         int i = 0;
         for (XSLFShape sh : src.getShapes()) {
             if (sh instanceof XSLFGraphicFrame) {

@@ -14,25 +14,35 @@ public class Tools {
 
     private static final Logger log = LoggerFactory.getLogger(Tools.class);
 
-    public static XSLFTable copyTable(XSLFSlide slide, XSLFTable src) {
-        return _Help.copyTable(slide, src);
+    public static XSLFTable copyTable(XSLFSheet sheet, XSLFTable src) {
+        return _Help.copyTable(sheet, src);
     }
 
     public static XSLFTableRow copyTableRow(XSLFTable table, XSLFTableRow src) {
         return _Help.copyTableRow(table, src);
     }
 
-    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest) {
+    public static XSLFAutoShape copyAutoShape(XSLFSheet sheet, XSLFAutoShape src) {
+        XSLFAutoShape shape = sheet.createAutoShape();
+        shape.getXmlObject().set(src.getXmlObject().copy());
+        //Rectangle2D position = src.getAnchor();
+        //Rectangle2D.Double rectangle = new Rectangle2D.Double(position.getX(), position.getY(), position.getWidth(), position.getHeight());
+        //shape.setAnchor(rectangle);
+        return shape;
+    }
+
+    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest) {
         return _Help.copyChart(src, index, dest);
     }
 
-    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest, Rectangle2D delta) {
+    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest, Rectangle2D delta) {
         return _Help.copyChart(src, index, dest, (chart, val) -> {
-            dest.addChart(chart, rectanglePx2point(val.getKey().getAnchor(), delta.getX(), delta.getY(), delta.getWidth(), delta.getHeight()));
+            Rectangle2D point = rectanglePx2point(val.getKey().getAnchor(), delta.getX(), delta.getY(), delta.getWidth(), delta.getHeight());
+            dest.addChart(chart, point);
         });
     }
 
-    public static XSLFChart copyChart(XSLFSlide src, int index, XSLFSlide dest, Rectangle position) {
+    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest, Rectangle position) {
         return _Help.copyChart(src, index, dest, (chart, val) -> {
             dest.addChart(chart, position); //rectanglePx2point(val.getKey().getAnchor(), 0, 0, 0, 0));
         });
@@ -40,12 +50,12 @@ public class Tools {
 
 
     /**
-     * @param slide
+     * @param sheet target slide
      * @param index from 0
      * @return maybe null
      */
-    public static XSLFChart findChart(XSLFSlide slide, int index) {
-        return _Help.findChart(slide, index);
+    public static XSLFChart findChart(XSLFSheet sheet, int index) {
+        return _Help.findChart(sheet, index);
     }
 
     public static Rectangle rectanglePx2point(Rectangle2D px) {
@@ -94,7 +104,7 @@ public class Tools {
         final XDDFDataSource<?> categoriesData = XDDFDataSourcesFactory.fromArray(categories, categoryDataRange);
         final XDDFNumericalDataSource<? extends Number> valuesData = XDDFDataSourcesFactory.fromArray(values, valuesDataRange);
 
-        XDDFPieChartData.Series firstSeries = (XDDFPieChartData.Series) pie.getSeries().get(0);
+        XDDFPieChartData.Series firstSeries = (XDDFPieChartData.Series) pie.getSeries(0);
         firstSeries.replaceData(categoriesData, valuesData);
         firstSeries.setTitle(chartTitle, chart.setSheetTitle(chartTitle, 0));
         // firstSeries.setExplosion(25);
