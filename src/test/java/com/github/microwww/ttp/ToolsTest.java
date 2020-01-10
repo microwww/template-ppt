@@ -1,10 +1,7 @@
 package com.github.microwww.ttp;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.poi.xslf.usermodel.XSLFSlide;
-import org.apache.poi.xslf.usermodel.XSLFTable;
-import org.apache.poi.xslf.usermodel._HelpTest;
+import org.apache.poi.xslf.usermodel.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -73,5 +70,41 @@ public class ToolsTest {
 
         slide = target.getSlides().get(0); //
         Assert.assertEquals(4, slide.getShapes().size());
+    }
+
+    @Test
+    public void testText() throws IOException {
+        XMLSlideShow target, template;
+        try (FileInputStream in = new FileInputStream(new File(PATH, "template.pptx"))) {
+            template = new XMLSlideShow(in);
+        }
+        try (FileInputStream in = new FileInputStream(new File(PATH, "template.pptx"))) {
+            target = new XMLSlideShow(in);
+            for (int i = target.getSlides().size(); i > 0; i--) {
+                target.removeSlide(i - 1);
+            }
+        }
+        XSLFSlide tmp = template.getSlides().get(2);
+        target.createSlide(tmp.getSlideLayout()).importContent(tmp);
+
+        XSLFAutoShape from = (XSLFAutoShape) tmp.getShapes().get(0);
+        XSLFSlide slide = target.createSlide(tmp.getSlideLayout());
+        Rectangle2D pst = from.getAnchor();
+        for (int i = 0; i < 3; i++) {
+            XSLFAutoShape shape = slide.createAutoShape();
+            Rectangle2D.Double rectangle = new Rectangle2D.Double(pst.getX(), pst.getY() + pst.getHeight() * i, pst.getWidth(), pst.getHeight());
+            shape.getXmlObject().set(from.getXmlObject().copy());
+            shape.setAnchor(rectangle);
+        }
+
+        File file = new File(PATH, UUID.randomUUID().toString() + ".pptx");
+        target.write(new FileOutputStream(file));
+
+        try (FileInputStream in = new FileInputStream(file)) {
+            target = new XMLSlideShow(in);
+        }
+
+        tmp = target.getSlides().get(1); //
+        Assert.assertEquals(3, tmp.getShapes().size());
     }
 }
