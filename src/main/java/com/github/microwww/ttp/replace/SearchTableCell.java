@@ -15,7 +15,7 @@ public class SearchTableCell implements SearchContent {
     }
 
     @Override
-    public List<TextExpress> search() {
+    public List<ReplaceExpress> search() {
         List<XSLFTextParagraph> pgs = this.cell.getTextParagraphs();
         for (XSLFTextParagraph pg : pgs) {
             for (XSLFTextRun run : pg.getTextRuns()) {

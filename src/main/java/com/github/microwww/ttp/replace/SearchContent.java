@@ -11,15 +11,15 @@ public interface SearchContent {
 
     public static final Pattern PATTERN = Pattern.compile("\\$\\{[$!=<~>a-zA-Z._0-9/\\[\\]@*?\\(\\)]+\\}");
 
-    List<TextExpress> search();
+    List<ReplaceExpress> search();
 
-    public static List<TextExpress> searchExpress(XSLFTextRun run) {
+    public static List<ReplaceExpress> searchExpress(XSLFTextRun run) {
         String text = run.getRawText();
         Matcher matcher = PATTERN.matcher(text);
-        List<TextExpress> list = new ArrayList<>();
+        List<ReplaceExpress> list = new ArrayList<>();
         while (matcher.find()) {
             String group = matcher.group();
-            list.add(new TextExpress(run, group, group.substring(2, group.length() - 1)));
+            list.add(new ReplaceExpress(run, group, group.substring(2, group.length() - 1)));
         }
         return list;
     }

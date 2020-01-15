@@ -3,15 +3,15 @@ package com.github.microwww.ttp.replace;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
 
-public class TextExpress {
+public class ReplaceExpress {
     private XSLFTextRun run;
     private String text;
     private String express;
 
-    public TextExpress() {
+    public ReplaceExpress() {
     }
 
-    public TextExpress(XSLFTextRun run, String text, String express) {
+    public ReplaceExpress(XSLFTextRun run, String text, String express) {
         this.run = run;
         this.text = text;
         this.express = express;

@@ -14,10 +14,10 @@ public class SearchTableRow implements SearchContent {
     }
 
     @Override
-    public List<TextExpress> search() {
-        ArrayList<TextExpress> list = new ArrayList<>();
+    public List<ReplaceExpress> search() {
+        ArrayList<ReplaceExpress> list = new ArrayList<>();
         for (XSLFTableCell cs : row.getCells()) {
-            List<TextExpress> search = new SearchTableCell(cs).search();
+            List<ReplaceExpress> search = new SearchTableCell(cs).search();
             list.addAll(search);
         }
         return list;
