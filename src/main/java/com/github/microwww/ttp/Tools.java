@@ -48,6 +48,9 @@ public class Tools {
         });
     }
 
+    public static boolean isEqual(double a, double b, double delta) {
+        return Math.abs(a - b) < Math.abs(delta);
+    }
 
     /**
      * @param sheet target slide
