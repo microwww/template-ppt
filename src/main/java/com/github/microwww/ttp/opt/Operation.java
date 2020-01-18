@@ -2,22 +2,22 @@ package com.github.microwww.ttp.opt;
 
 public class Operation {
 
-    private String operation;
-    private Object[] objects;
+    private String[] expresses;
+    private String[] params;
 
-    public String getOperation() {
-        return operation;
+    public String[] getExpresses() {
+        return expresses;
     }
 
-    public void setOperation(String operation) {
-        this.operation = operation;
+    public void setExpresses(String[] expresses) {
+        this.expresses = expresses;
     }
 
-    public Object[] getObjects() {
-        return objects;
+    public String[] getParams() {
+        return params;
     }
 
-    public void setObjects(Object[] objects) {
-        this.objects = objects;
+    public void setParams(String[] params) {
+        this.params = params;
     }
 }
