@@ -12,11 +12,19 @@ import java.util.regex.Pattern;
 
 public class ParseExpresses {
 
-    File file;
-    List<Operation> operations = new ArrayList<>();
+    private final File file;
+    private final List<Operation> operations = new ArrayList<>();
 
     public ParseExpresses(File file) {
         this.file = file;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public List<Operation> getOperations() {
+        return operations;
     }
 
     public void parse() throws IOException {
