@@ -7,12 +7,14 @@ import org.apache.poi.xslf.usermodel.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Operation {
+public abstract class Operation {
 
     private String[] expresses;
     private String[] params;
 
-    public String[] getExpresses() {
+    public abstract void parse(XSLFSheet slide, List<Operation> parsed);
+
+        public String[] getExpresses() {
         return expresses;
     }
 

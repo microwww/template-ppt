@@ -4,11 +4,14 @@ import com.github.microwww.ttp.Assert;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ParseExpresses {
+
     File file;
     List<Operation> operations = new ArrayList<>();
 
@@ -24,7 +27,7 @@ public class ParseExpresses {
                 break;
             }
             ln = ln.trim();
-            if (ln.length() == 0) {
+            if (ln.length() == 0 || ln.startsWith("#")) {
                 continue;
             }
             String[] exps;
@@ -38,10 +41,33 @@ public class ParseExpresses {
             } else {
                 exps = ln.split(" +");
             }
-            Operation ot = new Operation();
-            ot.setExpresses(exps);
-            ot.setParams(params);
-            operations.add(ot);
+            Operation operation = toOptions(exps, params);
+            operations.add(operation);
         }
+    }
+
+    public Operation toOptions(String[] exps, String[] params) {
+        for (int i = 0; i < exps.length; i++) {
+            String ex = exps[i];
+            Matcher matcher = Pattern.compile("[a-zA-Z]+").matcher(ex);
+            if (matcher.matches()) {
+                String exp = ex.substring(0, 1).toUpperCase() + ex.substring(1);
+                try {
+                    String name = this.getClass().getPackage().getName() + "." + exp + "Operation";
+                    Class<? extends Operation> clazz = (Class<? extends Operation>) Class.forName(name);
+                    Operation operation = clazz.getConstructor().newInstance();
+                    operation.setExpresses(exps);
+                    operation.setParams(params);
+                    return operation;
+                } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    throw new UnsupportedOperationException("Not support type :: " + ex, e);
+                }
+            }
+        }
+        throw new UnsupportedOperationException("Not support type :: "
+                + StringUtils.join(exps, " ")
+                + " ("
+                + StringUtils.join(params, " ")
+                + ")");
     }
 }
