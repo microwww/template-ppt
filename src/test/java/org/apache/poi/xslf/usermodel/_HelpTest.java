@@ -58,7 +58,7 @@ public class _HelpTest {
 
         XSLFSlide slide = target.createSlide();
         XSLFChart chart = _Help.copyChart(template.getSlides().get(0), 0, slide, (c, val) -> {
-            slide.addChart(c, _Help.rectanglePx2point(val.getKey().getAnchor(), 0, 0, 0, 0));
+            slide.addChart(c, _Help.rectanglePx2point(val.getGraphic().getAnchor(), 0, 0, 0, 0));
         });
         Assert.assertNotNull(chart);
 

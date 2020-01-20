@@ -9,6 +9,6 @@ public class RepeatOperation extends Operation {
     }
 
     public void parse(XSLFSheet slide) throws ClassNotFoundException {
-        super.getElement(slide, 1);
+        super.searchElement(slide, 1);
     }
 }

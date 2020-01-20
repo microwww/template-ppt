@@ -37,7 +37,8 @@ public class Tools {
 
     public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest, Rectangle2D delta) {
         return _Help.copyChart(src, index, dest, (chart, val) -> {
-            Rectangle2D point = rectanglePx2point(val.getKey().getAnchor(), delta.getX(), delta.getY(), delta.getWidth(), delta.getHeight());
+            Rectangle2D point = rectanglePx2point(val.getGraphic().getAnchor(), delta.getX(), delta.getY(), delta.getWidth(),
+                    delta.getHeight());
             dest.addChart(chart, point);
         });
     }

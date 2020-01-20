@@ -2,8 +2,7 @@ package com.github.microwww.ttp.opt;
 
 import com.github.microwww.ttp.Assert;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xslf.usermodel.XSLFShape;
-import org.apache.poi.xslf.usermodel.XSLFSheet;
+import org.apache.poi.xslf.usermodel.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,25 +28,86 @@ public class Operation {
         this.params = params;
     }
 
-    public void getElement(XSLFSheet slide, int from) throws ClassNotFoundException {
+    public List<?> searchElement(XSLFSheet slide, int from) throws ClassNotFoundException {
         String[] exp = getExpresses();
         Assert.isTrue((exp.length - from) % 2 == 0, "express message pare with shape / index !");
-        for (int i = from; i < exp.length; i += 2) {
-            String cname = "org.apache.poi.xslf.usermodel." + exp[i];
-            String index = exp[i + 1];
+        int level = from;
+        List<Object> parent = new ArrayList<>();
+        if (level < exp.length) {// 第一级
+            String cname = "org.apache.poi.xslf.usermodel." + exp[level];
+            String index = exp[level + 1];
             List<Range> list = Operation.searchRanges(index);
-            int idx = 0;
-            List<XSLFShape> inone = new ArrayList<>();
-            for (XSLFShape shape : slide.getShapes()) {
-                if (Class.forName(cname).isInstance(shape)) {
+            if (Class.forName(cname).equals(XSLFChart.class)) {
+                List<XSLFGraphicChart> charts = _Help.listCharts(slide);
+                for (int i = 0; i < charts.size(); i++) {
                     for (Range rg : list) {
-                        if (rg.isIn(idx)) {
-                            inone.add(shape);
+                        if (rg.isIn(i)) {
+                            parent.add(charts.get(i));
+                            break;
+                        }
+                    }
+                }
+            } else {
+                int idx = 0;
+                for (XSLFShape shape : slide.getShapes()) {
+                    if (Class.forName(cname).isInstance(shape)) {
+                        for (Range rg : list) {
+                            if (rg.isIn(idx)) {
+                                parent.add(shape);
+                                idx++;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
+        level += 2;
+        if (level < exp.length) {// 第二级
+            List<Object> next = new ArrayList<>();
+            String cname = "org.apache.poi.xslf.usermodel." + exp[level];
+            String index = exp[level + 1];
+            List<Range> list = Operation.searchRanges(index);
+            if (Class.forName(cname).equals(XSLFTableRow.class)) {
+                for (Object cn : parent) {
+                    if (cn instanceof XSLFTable) {
+                        List<XSLFTableRow> rows = ((XSLFTable) cn).getRows();
+                        for (int i = 0; i < rows.size(); i++) {
+                            for (Range r : list) {
+                                if (r.isIn(i)) {
+                                    next.add(rows.get(i));
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            parent = next;
+        }
+        level += 2;
+        List<Object> three = new ArrayList<>();
+        if (level < exp.length) {// 第二级
+            String cname = "org.apache.poi.xslf.usermodel." + exp[level];
+            String index = exp[level + 1];
+            List<Range> list = Operation.searchRanges(index);
+            if (Class.forName(cname).equals(XSLFTableRow.class)) {
+                for (Object cn : parent) {
+                    if (cn instanceof XSLFTableRow) {
+                        List<XSLFTableCell> cells = ((XSLFTableRow) cn).getCells();
+                        for (int i = 0; i < cells.size(); i++) {
+                            for (Range r : list) {
+                                if (r.isIn(i)) {
+                                    three.add(cells.get(i));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            parent = three;
+        }
+        return parent;
     }
 
     /**

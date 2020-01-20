@@ -15,9 +15,8 @@ import javax.xml.namespace.QName;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
-import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class _Help {
@@ -59,15 +58,15 @@ public class _Help {
 
     public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest) {
         return copyChart(src, index, dest, (c, v) -> {
-            Rectangle point = rectanglePx2point(v.getKey().getAnchor(), 0, 0, 0, 0);
+            Rectangle point = rectanglePx2point(v.getGraphic().getAnchor(), 0, 0, 0, 0);
             dest.addChart(c, point);
         });
     }
 
-    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest, BiConsumer<XSLFChart, Map.Entry<XSLFGraphicFrame, XSLFChart>> fun) {
-        Map.Entry<XSLFGraphicFrame, XSLFChart> position = findChartWithPosition(src, index);
+    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest, BiConsumer<XSLFChart, XSLFGraphicChart> fun) {
+        XSLFGraphicChart position = findChartWithPosition(src, index);
         if (position != null) {
-            XSLFChart from = position.getValue();
+            XSLFChart from = position.getChart();
             XSLFChart to = dest.getSlideShow().createChart();
             fun.accept(to, position);
             //dest.addChart(to, rectanglePx2point(position.getKey().getAnchor(), delta.x, delta.y, delta.width, delta.height));
@@ -101,23 +100,28 @@ public class _Help {
     }
 
     // copy from  XSLFGraphicFrame.copy
-    public static Map.Entry<XSLFGraphicFrame, XSLFChart> findChartWithPosition(XSLFSheet src, int index) {
-        int i = 0;
+    public static XSLFGraphicChart findChartWithPosition(XSLFSheet src, int index) {
+        List<XSLFGraphicChart> inx = listCharts(src);
+        if (inx.size() > index && index >= 0) {
+            return inx.get(index);
+        }
+        return null;
+    }
+
+    public static List<XSLFGraphicChart> listCharts(XSLFSheet src) {
+        List<XSLFGraphicChart> list = new ArrayList<>();
         for (XSLFShape sh : src.getShapes()) {
             if (sh instanceof XSLFGraphicFrame) {
                 XSLFGraphicFrame frame = (XSLFGraphicFrame) sh;
                 CTGraphicalObjectData data = ((CTGraphicalObjectFrame) frame.getXmlObject()).getGraphic().getGraphicData();
                 String uri = data.getUri();
                 if (uri.endsWith("/chart")) {
-                    if (i == index) {
-                        XSLFChart chart = findChart(frame);
-                        return new AbstractMap.SimpleEntry<>(frame, chart);
-                    }
-                    i++;
+                    XSLFChart chart = findChart(frame);
+                    list.add(new XSLFGraphicChart(frame, chart));
                 }
             }
         }
-        return null;
+        return list;
     }
 
     // copy from  XSLFGraphicFrame.copy

@@ -15,7 +15,7 @@ public class RepeatOperationTest {
     @Test
     public void searchRanges() {
         {
-            List<RepeatOperation.Range> ranges = Operation.searchRanges("1,5");
+            List<Range> ranges = Operation.searchRanges("1,5");
             assertEquals(ranges.size(), 2);
             assertEquals(ranges.get(0).getFrom(), 1);
             assertEquals(ranges.get(0).getTo(), 2);
@@ -23,13 +23,13 @@ public class RepeatOperationTest {
             assertEquals(ranges.get(1).getTo(), 6);
         }
         {
-            List<RepeatOperation.Range> ranges = Operation.searchRanges("1-");
+            List<Range> ranges = Operation.searchRanges("1-");
             assertEquals(ranges.size(), 1);
             assertEquals(ranges.get(0).getFrom(), 1);
             assertEquals(ranges.get(0).getTo(), Integer.MAX_VALUE);
         }
         {
-            List<RepeatOperation.Range> ranges = Operation.searchRanges("2,5-8,11");
+            List<Range> ranges = Operation.searchRanges("2,5-8,11");
             assertEquals(ranges.size(), 3);
             assertEquals(ranges.get(0).getFrom(), 2);
             assertEquals(ranges.get(0).getTo(), 3);
@@ -39,7 +39,7 @@ public class RepeatOperationTest {
             assertEquals(ranges.get(2).getTo(), 12);
         }
         {
-            List<RepeatOperation.Range> ranges = Operation.searchRanges("2,5-8,11-20,30-");
+            List<Range> ranges = Operation.searchRanges("2,5-8,11-20,30-");
             assertEquals(ranges.size(), 4);
             assertEquals(ranges.get(0).getFrom(), 2);
             assertEquals(ranges.get(0).getTo(), 3);
