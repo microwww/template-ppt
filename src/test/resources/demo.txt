@@ -9,13 +9,13 @@ delete slide 1
 [ slide 2 ]
 repeat XSLFTable 2 ( object.size 0,0,0,0 )
 > replace XSLFTableRow 1
-> repeat XSLFTableRow 2 [????]
+> repeat XSLFTableRow 2 ( ???? )
 >> replace ....
 
 [ slide 3 ]
 repeat XSLFTable 2 XSLFTableRow 2 ( object.size 0,0,0,0 )
 > replace XSLFTableRow 1
-> repeat XSLFTableRow 2 [????]
+> repeat XSLFTableRow 2 ( ???? )
 >> replace ....
 # repooo.....
 
