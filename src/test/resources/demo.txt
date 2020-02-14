@@ -1,21 +1,21 @@
 #### template
 
 [ slide 0 ]
-replace table 0,1 row 2-4 cell 4-
+replace XSLFTable 0,1 XSLFTableRow 2-4 XSLFTableCell 4-
 
 [ slide 1 ]
 delete slide 1
 
 [ slide 2 ]
-repeat table 2 [object.size] 0,0,0,0
-> replace row 1
-> repeat row 2 [????]
+repeat XSLFTable 2 ( object.size 0,0,0,0 )
+> replace XSLFTableRow 1
+> repeat XSLFTableRow 2 [????]
 >> replace ....
 
 [ slide 3 ]
-repeat table 2 row 2 | [object.size] 0,0,0,0
-> replace row 1
-> repeat row 2 [????]
+repeat XSLFTable 2 XSLFTableRow 2 ( object.size 0,0,0,0 )
+> replace XSLFTableRow 1
+> repeat XSLFTableRow 2 [????]
 >> replace ....
 # repooo.....
 
