@@ -1,6 +1,7 @@
 package com.github.microwww.ttp.opt;
 
 import com.github.microwww.ttp.Assert;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -38,8 +39,7 @@ public class ParseExpresses {
             if (ln.length() == 0 || ln.startsWith("#")) {
                 continue;
             }
-            String[] exps;
-            String[] params = new String[]{};
+            String[] exps, params = new String[]{};
             if (ln.endsWith(")")) {
                 String[] opts = StringUtils.split(ln, '(');
                 Assert.isTrue(opts.length == 2, "if has params , must has '(',')' , and end with ')'");
@@ -55,6 +55,7 @@ public class ParseExpresses {
     }
 
     public Operation toOptions(String[] exps, String[] params) {
+        String prefix = null;
         for (int i = 0; i < exps.length; i++) {
             String ex = exps[i];
             Matcher matcher = Pattern.compile("[a-zA-Z]+").matcher(ex);
@@ -64,18 +65,20 @@ public class ParseExpresses {
                     String name = this.getClass().getPackage().getName() + "." + exp + "Operation";
                     Class<? extends Operation> clazz = (Class<? extends Operation>) Class.forName(name);
                     Operation operation = clazz.getConstructor().newInstance();
-                    operation.setExpresses(exps);
+                    operation.setPrefix(prefix);
+                    operation.setExpresses(ArrayUtils.subarray(exps, i, exps.length));
                     operation.setParams(params);
                     return operation;
                 } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     throw new UnsupportedOperationException("Not support type :: " + ex, e);
                 }
+            } else {
+                if (prefix == null) {
+                    prefix = ex;
+                }
             }
         }
-        throw new UnsupportedOperationException("Not support type :: "
-                + StringUtils.join(exps, " ")
-                + " ("
-                + StringUtils.join(params, " ")
-                + ")");
+        throw new UnsupportedOperationException(String.format("Not support type :: %s ( %s )",
+                StringUtils.join(exps, " "), StringUtils.join(params, " ")));
     }
 }

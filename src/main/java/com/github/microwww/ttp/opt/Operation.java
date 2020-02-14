@@ -9,12 +9,13 @@ import java.util.List;
 
 public abstract class Operation {
 
+    private String prefix;
     private String[] expresses;
     private String[] params;
 
     public abstract void parse(XSLFSheet slide, List<Operation> parsed);
 
-        public String[] getExpresses() {
+    public String[] getExpresses() {
         return expresses;
     }
 
@@ -28,6 +29,14 @@ public abstract class Operation {
 
     public void setParams(String[] params) {
         this.params = params;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
     public List<?> searchElement(XSLFSheet slide, int from) throws ClassNotFoundException {
