@@ -4,13 +4,16 @@ import com.github.microwww.ttp.Tools;
 import org.apache.poi.xslf.usermodel.*;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class SearchTableCellTest {
     public static final String PATH = _HelpTest.PATH;
@@ -33,7 +36,7 @@ public class SearchTableCellTest {
         Map<String, Object> map = new HashMap<>();
         map.put("name", "china");
         map.put("age", 11);
-        for(ReplaceExpress run: search){
+        for (ReplaceExpress run : search) {
             Object val = map.get(run.getExpress());
             run.replace(val.toString());
         }

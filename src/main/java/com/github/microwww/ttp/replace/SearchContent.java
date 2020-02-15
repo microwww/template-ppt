@@ -1,6 +1,6 @@
 package com.github.microwww.ttp.replace;
 
-import org.apache.poi.xslf.usermodel.*;
+import org.apache.poi.xslf.usermodel.XSLFTextRun;
 
 import java.util.ArrayList;
 import java.util.List;

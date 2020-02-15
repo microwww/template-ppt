@@ -1,7 +1,5 @@
 package org.apache.poi.xslf.usermodel;
 
-import org.openxmlformats.schemas.presentationml.x2006.main.CTGraphicalObjectFrame;
-
 public class XSLFGraphicChart {
     private final XSLFGraphicFrame graphic;
     private final XSLFChart chart;

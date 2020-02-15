@@ -66,7 +66,7 @@ public class ParseExpresses {
                     Class<? extends Operation> clazz = (Class<? extends Operation>) Class.forName(name);
                     Operation operation = clazz.getConstructor().newInstance();
                     operation.setPrefix(prefix);
-                    operation.setExpresses(ArrayUtils.subarray(exps, i, exps.length));
+                    operation.setNode(ArrayUtils.subarray(exps, i + 1, exps.length));
                     operation.setParams(params);
                     return operation;
                 } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {

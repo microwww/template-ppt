@@ -7,19 +7,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SearchTable implements SearchContent {
-        private final XSLFTable table;
+    private final XSLFTable table;
 
-        public SearchTable(XSLFTable table) {
-            this.table = table;
-        }
-
-        @Override
-        public List<ReplaceExpress> search() {
-            ArrayList<ReplaceExpress> list = new ArrayList<>();
-            for(XSLFTableRow row : table.getRows()){
-                List<ReplaceExpress> search = new SearchTableRow(row).search();
-                list.addAll(search);
-            }
-            return list;
-        }
+    public SearchTable(XSLFTable table) {
+        this.table = table;
     }
+
+    @Override
+    public List<ReplaceExpress> search() {
+        ArrayList<ReplaceExpress> list = new ArrayList<>();
+        for (XSLFTableRow row : table.getRows()) {
+            List<ReplaceExpress> search = new SearchTableRow(row).search();
+            list.addAll(search);
+        }
+        return list;
+    }
+}
