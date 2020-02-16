@@ -1,6 +1,8 @@
 package com.github.microwww.ttp.opt;
 
 import com.github.microwww.ttp.Assert;
+import com.github.microwww.ttp.util.DefaultMemberAccess;
+import ognl.*;
 import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xslf.usermodel.*;
@@ -15,6 +17,9 @@ import java.util.List;
 public abstract class Operation {
 
     private static final Logger logger = LoggerFactory.getLogger(Operation.class);
+
+    protected OgnlContext context = new OgnlContext(new DefaultClassResolver(), new DefaultTypeConverter(),
+            new DefaultMemberAccess(true));
 
     private String prefix;
     private String[] node;
@@ -50,7 +55,7 @@ public abstract class Operation {
         String[] exp = getNode();
         Assert.isTrue(exp.length % 2 == 0, "express message pare with shape / index !");
 
-        List<Object> content = Collections.singletonList(context.getTemplateShow());
+        List<Object> content = Collections.singletonList(context.getTemplate());
         for (int i = 0; i < exp.length; i += 2) {
             List<Object> next = new ArrayList<>();
             for (Object cnt : content) {
@@ -62,11 +67,25 @@ public abstract class Operation {
         return content;
     }
 
-    private List<Object> searchElement(ParseContext context, Object content, String exp, String range) {
+    public Object getValue(String express, Object model) {
         try {
-            Object element = MethodUtils.invokeMethod(this, "findElement",
-                    new Object[]{context, content, exp, range});
-            return (List<Object>) element;
+            return Ognl.getValue(express, context, model);
+        } catch (OgnlException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Object> searchElement(ParseContext context, Object content, String exp, String range) {
+        Object element = thisInvoke("findElement", new Object[]{context, content, exp, range});
+        return (List<Object>) element;
+    }
+
+    protected Object thisInvoke(String method, Object... params) {
+        try {
+            if (params == null) {
+                params = new Object[]{};
+            }
+            return MethodUtils.invokeMethod(this, method, params);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

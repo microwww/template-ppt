@@ -14,6 +14,8 @@ public class ParseContext {
     //public static final String TARGET_SHOW = name_prefix + ".TARGET_SHOW";
     //public static final String TARGET = name_prefix + ".TARGET";
 
+    private Object data = new HashMap<>();
+
     public ParseContext(XMLSlideShow template) {
         map.put(TEMPLATE_SHOW, template);
     }
@@ -36,11 +38,19 @@ public class ParseContext {
         map.put(TEMPLATE, template);
     }
 
-    public void putData(String key, Object val) {
+    public void put(String key, Object val) {
         map.put(key, val);
     }
 
-    public <T> T getData(String key, Class<T> t) {
+    public <T> T get(String key, Class<T> t) {
         return (T) map.get(key);
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
     }
 }
