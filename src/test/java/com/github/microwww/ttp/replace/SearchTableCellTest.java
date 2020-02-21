@@ -4,14 +4,10 @@ import com.github.microwww.ttp.Tools;
 import org.apache.poi.xslf.usermodel.*;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 
@@ -41,10 +37,10 @@ public class SearchTableCellTest {
             run.replace(val.toString());
         }
 
-        File file = new File(PATH, UUID.randomUUID().toString() + ".pptx");
-        target.write(new FileOutputStream(file));
+        ByteArrayOutputStream mem = new ByteArrayOutputStream();
+        target.write(mem);
 
-        try (FileInputStream in = new FileInputStream(file)) {
+        try (InputStream in = new ByteArrayInputStream(mem.toByteArray())) {
             XSLFShape shape = new XMLSlideShow(in).getSlides().get(0).getShapes().get(0);
             XSLFTable tb = (XSLFTable) shape;
             String text = tb.getRows().get(3).getCells().get(2).getText();

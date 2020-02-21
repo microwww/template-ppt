@@ -18,7 +18,7 @@ public abstract class Operation {
 
     private static final Logger logger = LoggerFactory.getLogger(Operation.class);
 
-    protected OgnlContext context = new OgnlContext(new DefaultClassResolver(), new DefaultTypeConverter(),
+    private OgnlContext context = new OgnlContext(new DefaultClassResolver(), new DefaultTypeConverter(),
             new DefaultMemberAccess(true));
 
     private String prefix;
@@ -65,6 +65,14 @@ public abstract class Operation {
             content = next;
         }
         return content;
+    }
+
+    public <T> T getValue(String express, Object model, Class<T> clazz) {
+        try {
+            return (T) Ognl.getValue(express, context, model, clazz);
+        } catch (OgnlException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Object getValue(String express, Object model) {
@@ -166,7 +174,8 @@ public abstract class Operation {
             }
         } else if (XSLFTableCell.class.getSimpleName().equals(exp)) {
             for (XSLFTableRow row : content.getRows()) {
-                this.findElement(context, row, exp, range);
+                List<Object> lise = this.findElement(context, row, exp, range);
+                res.addAll(lise);
             }
         }
         return res;

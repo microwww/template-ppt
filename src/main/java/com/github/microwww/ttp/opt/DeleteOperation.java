@@ -43,7 +43,7 @@ public class DeleteOperation extends Operation {
         }
     }
 
-    public XSLFTable getTable(XSLFSheet sheet, XSLFTableRow row) {
+    public static XSLFTable getTable(XSLFSheet sheet, XSLFTableRow row) {
         for (XSLFShape shape : sheet.getShapes()) {
             if (shape instanceof XSLFTable) {
                 XSLFTable tb = ((XSLFTable) shape);
@@ -57,7 +57,7 @@ public class DeleteOperation extends Operation {
         return null;
     }
 
-    public XSLFTableRow getTableRow(XSLFSheet sheet, XSLFTableCell cell) {
+    public static XSLFTableRow getTableRow(XSLFSheet sheet, XSLFTableCell cell) {
         for (XSLFShape shape : sheet.getShapes()) {
             if (shape instanceof XSLFTable) {
                 XSLFTable tb = ((XSLFTable) shape);

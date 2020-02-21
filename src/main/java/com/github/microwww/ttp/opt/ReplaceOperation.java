@@ -20,7 +20,6 @@ public class ReplaceOperation extends Operation {
 
     @Override
     public void parse(ParseContext context) {
-        context.getTemplate();
         List<?> search = super.search(context);
         for (Object o : search) {
             thisInvoke("replace", new Object[]{context, o});
