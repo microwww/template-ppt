@@ -53,4 +53,12 @@ public class ParseContext {
     public void setData(Object data) {
         this.data = data;
     }
+
+    public void addData(String value, Object data) {
+        if (this.data instanceof Map) {
+            ((Map) this.data).put(value, data);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
 }

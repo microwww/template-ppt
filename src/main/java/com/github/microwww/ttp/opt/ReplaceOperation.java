@@ -4,9 +4,7 @@ import com.github.microwww.ttp.replace.ReplaceExpress;
 import com.github.microwww.ttp.replace.SearchTable;
 import com.github.microwww.ttp.replace.SearchTableCell;
 import com.github.microwww.ttp.replace.SearchTableRow;
-import org.apache.poi.xslf.usermodel.XSLFTable;
-import org.apache.poi.xslf.usermodel.XSLFTableCell;
-import org.apache.poi.xslf.usermodel.XSLFTableRow;
+import org.apache.poi.xslf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +43,22 @@ public class ReplaceOperation extends Operation {
         if (this.getParams().length > 0) {
             String param = this.getParams()[0];
             String val = getValue(param, context.getData()).toString();
-            try {
-                item.getTextParagraphs().get(0).getTextRuns().get(0).setText(val);
-            } catch (Exception ex) {
-                item.addNewTextParagraph().addNewTextRun();
-                item.getTextParagraphs().get(0).getTextRuns().get(0).setText(val);
+            for (int i = item.getTextParagraphs().size() - 1; i > 0; i--) {
+                item.getTextBody().removeParagraph(i);
             }
+            if (item.getTextParagraphs().isEmpty()) {
+                item.addNewTextParagraph().addNewTextRun();
+            }
+            XSLFTextParagraph paragraph = item.getTextParagraphs().get(0);
+            List<XSLFTextRun> runs = paragraph.getTextRuns();
+
+            for (int i = 1; i < runs.size(); i++) {
+                runs.get(0).setText("");
+            }
+            if (runs.isEmpty()) {
+                paragraph.addNewTextRun();
+            }
+            runs.get(0).setText(val);
         } else {
             List<ReplaceExpress> list = new SearchTableCell(item).search();
             replace(context, list);

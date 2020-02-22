@@ -13,15 +13,15 @@ import java.util.regex.Pattern;
 
 public class ParseExpresses {
 
-    private final File file;
+    private final InputStream inputStream;
     private final List<Operation> operations = new ArrayList<>();
 
-    public ParseExpresses(File file) {
-        this.file = file;
+    public ParseExpresses(File file) throws FileNotFoundException {
+        this.inputStream = new FileInputStream(file);
     }
 
-    public File getFile() {
-        return file;
+    public ParseExpresses(InputStream inputStream) throws FileNotFoundException {
+        this.inputStream = inputStream;
     }
 
     public List<Operation> getOperations() {
@@ -29,7 +29,7 @@ public class ParseExpresses {
     }
 
     public void parse() throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
         while (true) {
             String ln = in.readLine();
             if (ln == null) {

@@ -71,7 +71,7 @@ public abstract class Operation {
         try {
             return (T) Ognl.getValue(express, context, model, clazz);
         } catch (OgnlException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("OGNL express error : " + express, e);
         }
     }
 
@@ -79,7 +79,7 @@ public abstract class Operation {
         try {
             return Ognl.getValue(express, context, model);
         } catch (OgnlException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("OGNL express error : " + express, e);
         }
     }
 
