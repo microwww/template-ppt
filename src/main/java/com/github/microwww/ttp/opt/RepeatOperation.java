@@ -10,9 +10,21 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+import java.util.Stack;
 
 public class RepeatOperation extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(DeleteOperation.class);
+
+    private static final ThreadLocal<Stack> stack = new ThreadLocal() {
+        @Override
+        protected Stack initialValue() {
+            return new Stack<>();
+        }
+    };
+
+    public static Stack repeatStark() {
+        return stack.get();
+    }
 
     @Override
     public void parse(ParseContext context) {
