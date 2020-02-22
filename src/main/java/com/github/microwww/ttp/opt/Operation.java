@@ -145,10 +145,10 @@ public abstract class Operation {
                         for (Range rg : list) {
                             if (rg.isIn(idx)) {
                                 res.add(shape);
-                                idx++;
                                 break;
                             }
                         }
+                        idx++;
                     }
                 }
             } catch (ClassNotFoundException e) {
