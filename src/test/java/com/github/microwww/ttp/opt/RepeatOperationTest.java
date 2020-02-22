@@ -8,8 +8,7 @@ import org.apache.poi.xslf.usermodel.*;
 import org.junit.Test;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -63,7 +62,16 @@ public class RepeatOperationTest {
     @Test
     public void ctest() throws IOException, OgnlException {
         OgnlContext con = new OgnlContext(null, null, new DefaultMemberAccess(true));
-        Object value = Ognl.getValue("5", con, new HashMap<>());
+        Map<String, Object> map = new HashMap<>();
+        List<Map<String, String>> list = new ArrayList<>();
+        list.add(Collections.singletonMap("name", "1"));
+        list.add(Collections.singletonMap("name", "2"));
+        list.add(Collections.singletonMap("name", "3"));
+        list.add(Collections.singletonMap("name", "4"));
+        list.add(Collections.singletonMap("name", "5"));
+        list.add(Collections.singletonMap("name", "6"));
+        map.put("list", list);
+        Object value = Ognl.getValue("list.{name}", con, map);
         System.out.println("{  " + value + " }");
     }
 

@@ -1,9 +1,13 @@
 package com.github.microwww.ttp.opt;
 
+import com.github.microwww.ttp.Assert;
+import com.github.microwww.ttp.Tools;
 import com.github.microwww.ttp.replace.ReplaceExpress;
 import com.github.microwww.ttp.replace.SearchTable;
 import com.github.microwww.ttp.replace.SearchTableCell;
 import com.github.microwww.ttp.replace.SearchTableRow;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFPieChartData;
 import org.apache.poi.xslf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +36,34 @@ public class ReplaceOperation extends Operation {
     public void replace(ParseContext context, XSLFTable item) {
         List<ReplaceExpress> list = new SearchTable(item).search();
         replace(context, list);
+    }
+
+    public void replace(ParseContext context, XSLFGraphicChart item) {
+        XSLFChart chart = item.getChart();
+        List<XDDFChartData> data = chart.getChartSeries();
+        XDDFChartData chartdata = data.get(0);
+        String[] params = this.getParams();
+        Assert.isTrue(params.length >= 3, "Chart data [title, category[], data[]], Must 3 params value");
+
+        String title = super.getValue(params[0], context.getData()).toString();
+
+        List<Object> categories = (List) super.getValue(params[1], context.getData());
+        String[] cts = new String[categories.size()];
+        for (int i = 0; i < cts.length; i++) {
+            cts[i] = categories.get(i).toString();
+        }
+
+        List<Object> values = (List) super.getValue(params[2], context.getData());
+        Assert.isTrue(values.size() == categories.size(), "Error CATEGORY.length != VALUE.length");
+        Double[] dbs = new Double[categories.size()];
+        for (int i = 0; i < dbs.length; i++) {
+            dbs[i] = Double.valueOf(values.get(i).toString());
+        }
+
+        if (chartdata instanceof XDDFPieChartData) {
+            Tools.setPieDate(chart, title, cts, dbs);
+        }
+
     }
 
     public void replace(ParseContext context, XSLFTableRow item) {
