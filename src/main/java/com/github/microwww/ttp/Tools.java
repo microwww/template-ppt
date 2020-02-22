@@ -74,27 +74,32 @@ public class Tools {
         return _Help.rectanglePx2point(px, x, y, w, h);
     }
 
-    public static void setBarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[] values1, Double[] values2) {
-        final List<XDDFChartData> data = chart.getChartSeries();
-        final XDDFBarChartData bar = (XDDFBarChartData) data.get(0);
+    public static void setRadarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]... values) {
+        int size = categories.length;
+        List<XDDFChartData> s = chart.getChartSeries();
+        XDDFChartData bar = s.get(0);
 
-        final int numOfPoints = categories.length;
-        final String categoryDataRange = chart.formatRange(new CellRangeAddress(1, numOfPoints, 0, 0));
-        final String valuesDataRange = chart.formatRange(new CellRangeAddress(1, numOfPoints, 1, 1));
-        final String valuesDataRange2 = chart.formatRange(new CellRangeAddress(1, numOfPoints, 2, 2));
-        final XDDFDataSource<?> categoriesData = XDDFDataSourcesFactory.fromArray(categories, categoryDataRange, 0);
-        final XDDFNumericalDataSource<? extends Number> valuesData = XDDFDataSourcesFactory.fromArray(values1, valuesDataRange, 1);
-        final XDDFNumericalDataSource<? extends Number> valuesData2 = XDDFDataSourcesFactory.fromArray(values2, valuesDataRange2, 2);
+        String categoryDataRange = chart.formatRange(new CellRangeAddress(1, size, 0, 0));
+        XDDFDataSource<String> categoriesData = XDDFDataSourcesFactory.fromArray(//
+                categories, categoryDataRange, 0);
 
-        XDDFChartData.Series series1 = bar.getSeries(0);
-        series1.replaceData(categoriesData, valuesData);
-        series1.setTitle(series[0], chart.setSheetTitle(series[0], 0));
-        XDDFChartData.Series series2 = bar.addSeries(categoriesData, valuesData2);
-        series2.setTitle(series[1], chart.setSheetTitle(series[1], 1));
+        Assert.isTrue(series.length == values.length, "Error : series.length != values.length");
+        for (int i = 0; i < series.length; i++) {
+            String valuesDataRange = chart.formatRange(new CellRangeAddress(1, size, i + 1, i + 1));
+            XDDFNumericalDataSource<? extends Number> valuesData = XDDFDataSourcesFactory.fromArray(values[i], valuesDataRange, 1);
+            List<XDDFChartData.Series> seriess = bar.getSeries();
+            XDDFChartData.Series ss;
+            if (seriess.size() > i) {
+                ss = seriess.get(i);
+                ss.replaceData(categoriesData, valuesData);
+            } else {
+                ss = bar.addSeries(categoriesData, valuesData);
+            }
+            ss.setTitle(series[i], chart.setSheetTitle(series[i], 1));
+        }
 
         chart.plot(bar);
         chart.setTitleText(chartTitle); // https://stackoverflow.com/questions/30532612
-        // chart.setTitleOverlay(overlay);
     }
 
     public static void setPieDate(XSLFChart chart, String chartTitle, String[] categories, Double[] values) {
@@ -102,11 +107,11 @@ public class Tools {
         List<XDDFChartData> series = chart.getChartSeries();
         XDDFPieChartData pie = (XDDFPieChartData) series.get(0);
 
-        final int numOfPoints = categories.length;
-        final String categoryDataRange = chart.formatRange(new CellRangeAddress(1, numOfPoints, 0, 0));
-        final String valuesDataRange = chart.formatRange(new CellRangeAddress(1, numOfPoints, 1, 1));
-        final XDDFDataSource<?> categoriesData = XDDFDataSourcesFactory.fromArray(categories, categoryDataRange);
-        final XDDFNumericalDataSource<? extends Number> valuesData = XDDFDataSourcesFactory.fromArray(values, valuesDataRange);
+        int numOfPoints = categories.length;
+        String categoryDataRange = chart.formatRange(new CellRangeAddress(1, numOfPoints, 0, 0));
+        String valuesDataRange = chart.formatRange(new CellRangeAddress(1, numOfPoints, 1, 1));
+        XDDFDataSource<?> categoriesData = XDDFDataSourcesFactory.fromArray(categories, categoryDataRange);
+        XDDFNumericalDataSource<? extends Number> valuesData = XDDFDataSourcesFactory.fromArray(values, valuesDataRange);
 
         XDDFPieChartData.Series firstSeries = (XDDFPieChartData.Series) pie.getSeries(0);
         firstSeries.replaceData(categoriesData, valuesData);
