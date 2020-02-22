@@ -74,6 +74,25 @@ public class Tools {
         return _Help.rectanglePx2point(px, x, y, w, h);
     }
 
+    public static void setCellTextWithStyle(XSLFTableCell item, String val) {
+        for (int i = item.getTextParagraphs().size() - 1; i > 0; i--) {
+            item.getTextBody().removeParagraph(i);
+        }
+        if (item.getTextParagraphs().isEmpty()) {
+            item.addNewTextParagraph().addNewTextRun();
+        }
+        XSLFTextParagraph paragraph = item.getTextParagraphs().get(0);
+        List<XSLFTextRun> runs = paragraph.getTextRuns();
+
+        for (int i = 1; i < runs.size(); i++) {
+            runs.get(0).setText("");
+        }
+        if (runs.isEmpty()) {
+            paragraph.addNewTextRun();
+        }
+        runs.get(0).setText(val);
+    }
+
     public static void setRadarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]... values) {
         int size = categories.length;
         List<XDDFChartData> s = chart.getChartSeries();

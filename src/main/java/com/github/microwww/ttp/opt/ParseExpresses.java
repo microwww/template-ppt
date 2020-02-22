@@ -41,8 +41,9 @@ public class ParseExpresses {
             }
             String[] exps, params = new String[]{};
             if (ln.endsWith(")")) {
-                String[] opts = StringUtils.split(ln, '(');
-                Assert.isTrue(opts.length == 2, "if has params , must has '(',')' , and end with ')'");
+                int idx = ln.indexOf('(', 0);
+                String[] opts = new String[]{ln.substring(0, idx), ln.substring(idx + 1)};
+                // Assert.isTrue(opts.length == 2, "if has params , must has '(',')' , and end with ')'");
                 exps = opts[0].split(" +");
                 Assert.isTrue(exps.length > 0, "must has express");
                 params = opts[1].substring(0, opts[1].length() - 1).trim().split(" +");

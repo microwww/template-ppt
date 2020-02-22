@@ -97,22 +97,7 @@ public class ReplaceOperation extends Operation {
         if (this.getParams().length > 0) {
             String param = this.getParams()[0];
             String val = getValue(param, context.getData()).toString();
-            for (int i = item.getTextParagraphs().size() - 1; i > 0; i--) {
-                item.getTextBody().removeParagraph(i);
-            }
-            if (item.getTextParagraphs().isEmpty()) {
-                item.addNewTextParagraph().addNewTextRun();
-            }
-            XSLFTextParagraph paragraph = item.getTextParagraphs().get(0);
-            List<XSLFTextRun> runs = paragraph.getTextRuns();
-
-            for (int i = 1; i < runs.size(); i++) {
-                runs.get(0).setText("");
-            }
-            if (runs.isEmpty()) {
-                paragraph.addNewTextRun();
-            }
-            runs.get(0).setText(val);
+            Tools.setCellTextWithStyle(item, val);
         } else {
             List<ReplaceExpress> list = new SearchTableCell(item).search();
             replace(context, list);

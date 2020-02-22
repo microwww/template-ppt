@@ -4,11 +4,13 @@ import com.github.microwww.ttp.Assert;
 import com.github.microwww.ttp.Tools;
 import org.apache.poi.xslf.usermodel.XSLFSheet;
 import org.apache.poi.xslf.usermodel.XSLFTable;
+import org.apache.poi.xslf.usermodel.XSLFTableCell;
 import org.apache.poi.xslf.usermodel.XSLFTableRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.geom.Rectangle2D;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -42,9 +44,33 @@ public class RepeatOperation extends Operation {
         XSLFTable table = DeleteOperation.getTable(context.getTemplate(), row);
         String[] param = this.getParams();
         Assert.isTrue(param.length > 0, "repeat XSLFTable must have [count]");
-        int count = Integer.valueOf(super.getValue(param[0], context.getData(), String.class)).intValue();
-        for (int i = 0; i < count; i++) {
-            Tools.copyTableRow(table, row);
+        List<Object> list = super.getValue(param[0], context.getData(), List.class);
+        for (int i = 0; i < list.size(); i++) {
+            XSLFTableRow nrow = Tools.copyTableRow(table, row);
+            List<XSLFTableCell> cells = nrow.getCells();
+            for (int k = 0; k < cells.size(); k++) {
+                if (k + 1 < param.length) {
+                    String exp = param[k + 1];
+                    XSLFTableCell cell = cells.get(k);
+                    ReplaceOperation rp = new ReplaceOperation();
+                    if (exp.equalsIgnoreCase("null")) {
+                        rp.setParams(new String[]{});
+                    } else {
+                        rp.setParams(new String[]{exp});
+                    }
+                    Object origin = context.getData();
+                    try {
+                        context.setData(Collections.singletonMap("item", list.get(i)));
+                        rp.replace(context, cell);
+                    } catch (Exception e) {// ignore
+                        context.setData(origin);
+                        rp.replace(context, cell);
+                    } finally {
+                        context.setData(origin);
+                    }
+                }
+            }
+
         }
     }
 
