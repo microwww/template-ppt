@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 
 public abstract class Operation {
 
@@ -24,6 +25,8 @@ public abstract class Operation {
     private String prefix;
     private String[] node;
     private String[] params;
+
+    protected final Stack<List<Object>> nodeStack = new Stack();
 
     public abstract void parse(ParseContext context);
 
@@ -58,6 +61,7 @@ public abstract class Operation {
         List<Object> content = Collections.singletonList(context.getTemplate());
         for (int i = 0; i < exp.length; i += 2) {
             List<Object> next = new ArrayList<>();
+            nodeStack.push(next);
             for (Object cnt : content) {
                 List<Object> list = searchElement(context, cnt, exp[i], exp[i + 1]);
                 next.addAll(list);
@@ -153,6 +157,24 @@ public abstract class Operation {
                 }
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("Exception not support ! Must in package: org.apache.poi.xslf.usermodel", e);
+            }
+        }
+        return res;
+    }
+
+    // 二级
+    public List<Object> findElement(ParseContext context, XSLFTextShape content, String exp, String range) {
+        List<Object> res = new ArrayList<>();
+        List<Range> list = Operation.searchRanges(range);
+        if (XSLFTextParagraph.class.getSimpleName().equals(exp)) {
+            List<XSLFTextParagraph> rows = content.getTextParagraphs();
+            for (int i = 0; i < rows.size(); i++) {
+                for (Range r : list) {
+                    if (r.isIn(i)) {
+                        res.add(rows.get(i));
+                        break;
+                    }
+                }
             }
         }
         return res;
