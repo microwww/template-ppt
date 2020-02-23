@@ -49,7 +49,9 @@ public class ReplaceOperation extends Operation {
         String[] params = this.getParams();
         Assert.isTrue(params.length >= 3, "Chart data [title, category[], data[]], Must 3 params value");
 
-        String title = super.getValue(params[0], context.getData()).toString();
+        ParamMessage msg = this.getParamsWithPattern()[0];
+        Object value = super.getValue(msg.getParam(), context.getData());
+        String title = msg.format(value);
 
         List<Object> categories = (List) super.getValue(params[1], context.getData());
         String[] cts = parse2string(categories);
@@ -95,9 +97,12 @@ public class ReplaceOperation extends Operation {
 
     public void replace(ParseContext context, XSLFTableCell item) {
         if (this.getParams().length > 0) {
-            String param = this.getParams()[0];
-            String val = getValue(param, context.getData()).toString();
-            Tools.setCellTextWithStyle(item, val);
+            StringBuffer buffer = new StringBuffer();
+            for (ParamMessage param : this.getParamsWithPattern()) {
+                Object val = getValue(param.getParam(), context.getData());
+                buffer.append(param.format(val));
+            }
+            Tools.setCellTextWithStyle(item, buffer.toString());
         } else {
             List<ReplaceExpress> list = new SearchTableCell(item).search();
             replace(context, list);

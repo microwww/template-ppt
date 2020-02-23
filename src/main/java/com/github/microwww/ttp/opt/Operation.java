@@ -227,4 +227,41 @@ public abstract class Operation {
         }
         return list;
     }
+
+    public ParamMessage[] getParamsWithPattern() {
+        String[] params = getParams();
+        ParamMessage[] res = new ParamMessage[params.length];
+        for (int i = 0; i < params.length; i++) {
+            String param = params[i];
+            int idx = param.lastIndexOf('|');
+            if (idx > 0) {
+                res[i] = new ParamMessage(param.substring(0, idx), param.substring(idx + 1));
+            } else {
+                res[i] = new ParamMessage(param, "%s");
+            }
+        }
+        return res;
+    }
+
+    public static class ParamMessage {
+        private final String param;
+        private final String pattern;
+
+        public ParamMessage(String param, String pattern) {
+            this.param = param;
+            this.pattern = pattern;
+        }
+
+        public String getParam() {
+            return param;
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
+
+        public String format(Object... arg) {
+            return String.format(this.pattern, arg);
+        }
+    }
 }
