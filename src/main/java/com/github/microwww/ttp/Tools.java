@@ -82,6 +82,10 @@ public class Tools {
             item.addNewTextParagraph().addNewTextRun();
         }
         XSLFTextParagraph paragraph = item.getTextParagraphs().get(0);
+        setParagraphText(paragraph, val);
+    }
+
+    public static void setParagraphText(XSLFTextParagraph paragraph, String val) {
         List<XSLFTextRun> runs = paragraph.getTextRuns();
 
         for (int i = 1; i < runs.size(); i++) {
