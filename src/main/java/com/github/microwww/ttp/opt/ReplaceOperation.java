@@ -10,8 +10,8 @@ import org.apache.poi.xslf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class ReplaceOperation extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(ReplaceOperation.class);
@@ -51,20 +51,20 @@ public class ReplaceOperation extends Operation {
         Object value = super.getValue(msg.getParam(), context.getData());
         String title = msg.format(value);
 
-        List<Object> categories = (List) super.getValue(params[1], context.getData());
+        Collection categories = toList(super.getValue(params[1], context.getData()));
         String[] cts = parse2string(categories);
 
         if (type instanceof XDDFPieChartData) {
-            List<Object> values = (List) super.getValue(params[2], context.getData());
+            Collection values = toList(super.getValue(params[2], context.getData()));
             Assert.isTrue(values.size() == categories.size(), "Error CATEGORY.length != VALUE.length");
             Double[] dbs = parse2double(values);
             Tools.setPieDate(chart, title, cts, dbs);
         } else if (type instanceof XDDFRadarChartData) {
-            List<Object> series = (List) super.getValue(params[2], context.getData());
+            Collection series = toList(super.getValue(params[2], context.getData()));
             String[] ss = parse2string(series);
             Double[][] dbs = new Double[params.length - 3][];
             for (int i = 0; i < dbs.length; i++) {
-                List<Object> values = (List) super.getValue(params[i + 3], context.getData());
+                Collection values = toList(super.getValue(params[i + 3], context.getData()));
                 dbs[i] = parse2double(values);
             }
             Tools.setRadarData(chart, title, cts, ss, dbs);
@@ -72,18 +72,34 @@ public class ReplaceOperation extends Operation {
 
     }
 
-    public static Double[] parse2double(List<Object> values) {
+    public static Collection toList(Object o) {
+        if (o instanceof Collection) {
+            return (Collection) o;
+        } else if (o.getClass().isArray()) {
+            int size = Array.getLength(o);
+            List list = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                list.add(Array.get(o, i));
+            }
+            return list;
+        }
+        throw new UnsupportedOperationException("Result must is ARRAY / LIST / COLLECTION");
+    }
+
+    public static Double[] parse2double(Collection<Object> values) {
         Double[] dbs = new Double[values.size()];
-        for (int i = 0; i < dbs.length; i++) {
-            dbs[i] = Double.valueOf(values.get(i).toString());
+        int i = 0;
+        for (Object value : values) {
+            dbs[i++] = Double.valueOf(value.toString());
         }
         return dbs;
     }
 
-    public static String[] parse2string(List<Object> values) {
+    public static String[] parse2string(Collection<Object> values) {
         String[] cts = new String[values.size()];
-        for (int i = 0; i < cts.length; i++) {
-            cts[i] = values.get(i).toString();
+        int i = 0;
+        for (Object value : values) {
+            cts[i++] = value.toString();
         }
         return cts;
     }
@@ -91,14 +107,6 @@ public class ReplaceOperation extends Operation {
     public void replace(ParseContext context, XSLFTableRow item) {
         List<ReplaceExpress> list = new SearchTableRow(item).search();
         replace(context, list);
-    }
-
-    public void replace(ParseContext context, XSLFTableCell item) {
-        replace(context, (XSLFTextShape) item);
-    }
-
-    public void replace(ParseContext context, XSLFTextBox item) {
-        replace(context, (XSLFTextShape) item);
     }
 
     public void replace(ParseContext context, XSLFTextShape item) {
