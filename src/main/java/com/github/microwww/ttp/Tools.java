@@ -85,7 +85,7 @@ public class Tools {
         List<XSLFTextRun> runs = paragraph.getTextRuns();
 
         for (int i = 1; i < runs.size(); i++) {
-            runs.get(0).setText("");
+            runs.get(i).setText("");
         }
         if (runs.isEmpty()) {
             paragraph.addNewTextRun();
