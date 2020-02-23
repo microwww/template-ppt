@@ -2,10 +2,7 @@ package com.github.microwww.ttp.opt;
 
 import com.github.microwww.ttp.Assert;
 import com.github.microwww.ttp.Tools;
-import org.apache.poi.xslf.usermodel.XSLFSheet;
-import org.apache.poi.xslf.usermodel.XSLFTable;
-import org.apache.poi.xslf.usermodel.XSLFTableCell;
-import org.apache.poi.xslf.usermodel.XSLFTableRow;
+import org.apache.poi.xslf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +37,39 @@ public class RepeatOperation extends Operation {
         logger.warn("Not support copy type : {}", o.getClass());
     }
 
+    public void copy(ParseContext context, XSLFTextParagraph paragraph) {
+        Assert.isTrue(nodeStack.size() >= 2, "STACK MUST DEPEND > 2");
+        List<Object> peek = nodeStack.get(nodeStack.size() - 2);
+        XSLFTextShape content = null;
+        int i = 0;
+        for (Object pk : peek) {
+            if (pk instanceof XSLFTextShape) {
+                XSLFTextShape shape = (XSLFTextShape) pk;
+                i = 0;
+                for (XSLFTextParagraph gh : shape.getTextParagraphs()) {
+                    i++;
+                    if (gh.equals(paragraph)) {
+                        content = shape;
+                        break;
+                    }
+                }
+            }
+            if (content != null) {
+                break;
+            }
+        }
+        if (content != null) {
+            ParamMessage[] param = this.getParamsWithPattern();
+            for (int k = 0; k < param.length; k++) {
+                ParamMessage pm = param[k];
+                Object val = super.getValue(pm.getParam(), context.getData());
+                XSLFTextParagraph tp = content.addNewTextParagraph();
+                tp.getXmlObject().set(paragraph.getXmlObject().copy());
+                content.getTextBody().getParagraph(i + k).setText(pm.format(val));
+            }
+        }
+    }
+
     public void copy(ParseContext context, XSLFTableRow row) {
         XSLFTable table = DeleteOperation.getTable(context.getTemplate(), row);
         String[] param = this.getParams();
@@ -52,25 +82,29 @@ public class RepeatOperation extends Operation {
                 if (k + 1 < param.length) {
                     String exp = param[k + 1];
                     XSLFTableCell cell = cells.get(k);
-                    ReplaceOperation rp = new ReplaceOperation();
-                    if (exp.equalsIgnoreCase("null")) {
-                        rp.setParams(new String[]{});
-                    } else {
-                        rp.setParams(new String[]{exp});
-                    }
-                    Object origin = context.getData();
-                    try {
-                        context.setData(Collections.singletonMap("item", list.get(i)));
-                        rp.replace(context, cell);
-                    } catch (Exception e) {// ignore
-                        context.setData(origin);
-                        rp.replace(context, cell);
-                    } finally {
-                        context.setData(origin);
-                    }
+                    repeat(context, list.get(i), exp, cell);
                 }
             }
 
+        }
+    }
+
+    public void repeat(ParseContext context, Object obj, String exp, XSLFTextShape cell) {
+        ReplaceOperation rp = new ReplaceOperation();
+        if (exp.equalsIgnoreCase("null")) {
+            rp.setParams(new String[]{});
+        } else {
+            rp.setParams(new String[]{exp});
+        }
+        Object origin = context.getData();
+        try {
+            context.setData(Collections.singletonMap("item", obj));
+            rp.replace(context, cell);
+        } catch (Exception e) {// ignore
+            context.setData(origin);
+            rp.replace(context, cell);
+        } finally {
+            context.setData(origin);
         }
     }
 
