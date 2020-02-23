@@ -2,10 +2,7 @@ package com.github.microwww.ttp.opt;
 
 import com.github.microwww.ttp.Assert;
 import com.github.microwww.ttp.Tools;
-import com.github.microwww.ttp.replace.ReplaceExpress;
-import com.github.microwww.ttp.replace.SearchTable;
-import com.github.microwww.ttp.replace.SearchTableCell;
-import com.github.microwww.ttp.replace.SearchTableRow;
+import com.github.microwww.ttp.replace.*;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFPieChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFRadarChartData;
@@ -13,6 +10,7 @@ import org.apache.poi.xslf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ReplaceOperation extends Operation {
@@ -96,17 +94,35 @@ public class ReplaceOperation extends Operation {
     }
 
     public void replace(ParseContext context, XSLFTableCell item) {
+        replace(context, (XSLFTextShape) item);
+    }
+
+    public void replace(ParseContext context, XSLFTextBox item) {
+        replace(context, (XSLFTextShape) item);
+    }
+
+    public void replace(ParseContext context, XSLFTextShape item) {
         if (this.getParams().length > 0) {
             StringBuffer buffer = new StringBuffer();
             for (ParamMessage param : this.getParamsWithPattern()) {
                 Object val = getValue(param.getParam(), context.getData());
                 buffer.append(param.format(val));
             }
-            Tools.setCellTextWithStyle(item, buffer.toString());
+            Tools.setTextShapeWithStyle(item, buffer.toString());
         } else {
-            List<ReplaceExpress> list = new SearchTableCell(item).search();
+            List<ReplaceExpress> list = search(item);
             replace(context, list);
         }
+    }
+
+    public static List<ReplaceExpress> search(XSLFTextShape item) {
+        List<XSLFTextParagraph> pgs = item.getTextParagraphs();
+        for (XSLFTextParagraph pg : pgs) {
+            for (XSLFTextRun run : pg.getTextRuns()) {
+                return SearchContent.searchExpress(run);
+            }
+        }
+        return Collections.emptyList();
     }
 
     private void replace(ParseContext context, List<ReplaceExpress> list) {

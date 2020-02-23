@@ -74,7 +74,7 @@ public class Tools {
         return _Help.rectanglePx2point(px, x, y, w, h);
     }
 
-    public static void setCellTextWithStyle(XSLFTableCell item, String val) {
+    public static void setTextShapeWithStyle(XSLFTextShape item, String val) {
         for (int i = item.getTextParagraphs().size() - 1; i > 0; i--) {
             item.getTextBody().removeParagraph(i);
         }
