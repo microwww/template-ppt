@@ -3,6 +3,8 @@ package com.github.microwww.ttp;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xslf.usermodel.*;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTRegularTextRun;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTTextParagraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +97,51 @@ public class Tools {
             paragraph.addNewTextRun();
         }
         runs.get(0).setText(val);
+    }
+
+    public static void replace(XSLFTextParagraph paragraph, String origin, String replacement) {
+        CTTextParagraph xml = paragraph.getXmlObject();
+        StringBuffer buffer = new StringBuffer();
+        List<CTRegularTextRun> runs = xml.getRList();
+        for (CTRegularTextRun rText : runs) {
+            buffer.append(rText.getT());
+        }
+        int idx = buffer.indexOf(origin), fromRun = -1, toRun = -1, cursor = 0;
+        int end = idx + origin.length();
+        for (int i = 0; i < runs.size(); i++) {
+            CTRegularTextRun rText = runs.get(i);
+            String text = rText.getT(), start = "", fix = "";
+            int len = text.length();
+
+            if (idx >= cursor + len) {// 未开始
+                cursor += len;
+                continue;
+            }
+            if (end < cursor) { // 已结束
+                break;
+            }
+
+            if (idx >= cursor && idx <= cursor + len) {// 起始
+                fromRun = i;
+                // int fromRunPosition = idx - cursor;
+                start = text.substring(0, idx - cursor) + replacement;// 开始替换:取前半段然后追加替换字符
+            }
+            if (end >= cursor && end <= cursor + len) {
+                toRun = i;
+                // int toRunPosition = end - cursor;
+                fix = text.substring(end - cursor); // 取后半段
+            }
+            rText.setT(start + fix);
+            cursor += len;
+        }
+        Assert.isTrue(fromRun >= 0 && toRun >= 0, "NOT find message by XML : " + origin + ", check it");
+    }
+
+    public static XSLFTextParagraph copy(XSLFTextParagraph paragraph) {
+        XSLFTextShape shape = paragraph.getParentShape();
+        XSLFTextParagraph newPg = shape.addNewTextParagraph();
+        newPg.getXmlObject().set(paragraph.getXmlObject().copy());
+        return newPg;
     }
 
     public static void setRadarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]... values) {
