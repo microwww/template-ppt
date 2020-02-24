@@ -77,13 +77,14 @@ public class Tools {
     }
 
     public static void setTextShapeWithStyle(XSLFTextShape item, String val) {
-        for (int i = item.getTextParagraphs().size() - 1; i > 0; i--) {
+        List<XSLFTextParagraph> ghs = item.getTextParagraphs();
+        if (ghs.isEmpty()) {
+            throw new IllegalArgumentException("You must write some word for Get text format");
+        }
+        for (int i = ghs.size() - 1; i > 0; i--) {
             item.getTextBody().removeParagraph(i);
         }
-        if (item.getTextParagraphs().isEmpty()) {
-            item.addNewTextParagraph().addNewTextRun();
-        }
-        XSLFTextParagraph paragraph = item.getTextParagraphs().get(0);
+        XSLFTextParagraph paragraph = ghs.get(0);
         setParagraphText(paragraph, val);
     }
 
