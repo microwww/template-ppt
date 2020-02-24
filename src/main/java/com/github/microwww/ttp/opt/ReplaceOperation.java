@@ -33,7 +33,7 @@ public class ReplaceOperation extends Operation {
     }
 
     public void replace(ParseContext context, XSLFTable item) {
-        List<ReplaceExpress> list = new SearchTable(item).search();
+        List<ReplaceExpress> list = SearchContent.search(item);
         replace(context, list);
     }
 
@@ -105,7 +105,7 @@ public class ReplaceOperation extends Operation {
     }
 
     public void replace(ParseContext context, XSLFTableRow item) {
-        List<ReplaceExpress> list = new SearchTableRow(item).search();
+        List<ReplaceExpress> list = SearchContent.search(item);
         replace(context, list);
     }
 
@@ -118,19 +118,9 @@ public class ReplaceOperation extends Operation {
             }
             Tools.setTextShapeWithStyle(item, buffer.toString());
         } else {
-            List<ReplaceExpress> list = search(item);
+            List<ReplaceExpress> list = SearchContent.search(item);
             replace(context, list);
         }
-    }
-
-    public static List<ReplaceExpress> search(XSLFTextShape item) {
-        List<XSLFTextParagraph> pgs = item.getTextParagraphs();
-        for (XSLFTextParagraph pg : pgs) {
-            for (XSLFTextRun run : pg.getTextRuns()) {
-                return SearchContent.searchExpress(run);
-            }
-        }
-        return Collections.emptyList();
     }
 
     private void replace(ParseContext context, List<ReplaceExpress> list) {

@@ -1,24 +1,25 @@
 package com.github.microwww.ttp.replace;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xslf.usermodel.XSLFTextRun;
+import com.github.microwww.ttp.Tools;
+import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 
 public class ReplaceExpress {
-    private XSLFTextRun run;
+    private XSLFTextParagraph run;
     private String text;
     private String express;
 
     public ReplaceExpress() {
     }
 
-    public ReplaceExpress(XSLFTextRun run, String text, String express) {
+    public ReplaceExpress(XSLFTextParagraph run, String text, String express) {
         this.run = run;
         this.text = text;
         this.express = express;
     }
 
     public void replace(String text) {
-        run.setText(StringUtils.replace(run.getRawText(), this.text, text));
+        Tools.replace(run, this.text, text);
+        //run.setText(StringUtils.replace(run.getRawText(), this.text, text));
     }
 
     public String getText() {

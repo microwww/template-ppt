@@ -28,7 +28,7 @@ public class SearchTableCellTest {
         }
         XSLFSlide slide = target.createSlide();
         XSLFTable table = Tools.copyTable(slide, (XSLFTable) template.getSlides().get(0).getShapes().get(0));
-        List<ReplaceExpress> search = new SearchTable(table).search();
+        List<ReplaceExpress> search = SearchContent.search(table);
         Map<String, Object> map = new HashMap<>();
         map.put("name", "china");
         map.put("age", 11);
