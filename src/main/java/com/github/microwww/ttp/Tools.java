@@ -88,15 +88,7 @@ public class Tools {
     }
 
     public static void setParagraphText(XSLFTextParagraph paragraph, String val) {
-        List<XSLFTextRun> runs = paragraph.getTextRuns();
-
-        for (int i = 1; i < runs.size(); i++) {
-            runs.get(i).setText("");
-        }
-        if (runs.isEmpty()) {
-            paragraph.addNewTextRun();
-        }
-        runs.get(0).setText(val);
+        replace(paragraph, paragraph.getText(), val);
     }
 
     public static void replace(XSLFTextParagraph paragraph, String origin, String replacement) {

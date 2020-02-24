@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.geom.Rectangle2D;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
@@ -38,35 +39,15 @@ public class RepeatOperation extends Operation {
     }
 
     public void copy(ParseContext context, XSLFTextParagraph paragraph) {
-        Assert.isTrue(nodeStack.size() >= 2, "STACK MUST DEPEND > 2");
-        List<Object> peek = nodeStack.get(nodeStack.size() - 2);
-        XSLFTextShape content = null;
-        int i = 0;
-        for (Object pk : peek) {
-            if (pk instanceof XSLFTextShape) {
-                XSLFTextShape shape = (XSLFTextShape) pk;
-                i = 0;
-                for (XSLFTextParagraph gh : shape.getTextParagraphs()) {
-                    i++;
-                    if (gh.equals(paragraph)) {
-                        content = shape;
-                        break;
-                    }
-                }
-            }
-            if (content != null) {
-                break;
-            }
-        }
-        if (content != null) {
-            ParamMessage[] param = this.getParamsWithPattern();
-            for (int k = 0; k < param.length; k++) {
-                ParamMessage pm = param[k];
-                Object val = super.getValue(pm.getParam(), context.getData());
-                XSLFTextParagraph tp = content.addNewTextParagraph();
-                tp.getXmlObject().set(paragraph.getXmlObject().copy());
-                content.getTextBody().getParagraph(i + k).setText(pm.format(val));
-            }
+        // XSLFTextShape content = paragraph.getParentShape();
+        ParamMessage[] param = this.getParamsWithPattern();
+        Assert.isTrue(param.length > 0, "Repeat must has params");
+        ParamMessage pm = param[0];
+        Object os = super.getValue(pm.getParam(), context.getData());
+        Collection<Object> list = ReplaceOperation.toList(os);
+        for (Object val : list) {
+            XSLFTextParagraph copy = Tools.copy(paragraph);
+            Tools.replace(copy, paragraph.getText(), pm.format(val));
         }
     }
 
