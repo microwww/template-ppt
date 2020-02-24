@@ -32,11 +32,6 @@ public class ReplaceOperation extends Operation {
         logger.warn("Not support type : {}", item.getClass());
     }
 
-    public void replace(ParseContext context, XSLFTable item) {
-        List<ReplaceExpress> list = SearchContent.search(item);
-        replace(context, list);
-    }
-
     public void replace(ParseContext context, XSLFGraphicChart item) {
         XSLFChart chart = item.getChart();
         List<XDDFChartData> data = chart.getChartSeries();
@@ -106,11 +101,13 @@ public class ReplaceOperation extends Operation {
 
     public void replace(ParseContext context, XSLFTableRow item) {
         List<ReplaceExpress> list = SearchContent.search(item);
-        replace(context, list);
+        for (XSLFTableCell cell : item.getCells()) {
+            replace(context, cell);
+        }
     }
 
     public void replace(ParseContext context, XSLFTextShape item) {
-        if (this.getParams().length > 0) {
+        if (this.getParams().length == 1) {
             StringBuffer buffer = new StringBuffer();
             for (ParamMessage param : this.getParamsWithPattern()) {
                 Object val = getValue(param.getParam(), context.getData());
@@ -118,16 +115,18 @@ public class ReplaceOperation extends Operation {
             }
             Tools.setTextShapeWithStyle(item, buffer.toString());
         } else {
-            List<ReplaceExpress> list = SearchContent.search(item);
-            replace(context, list);
-        }
-    }
+            List<ReplaceExpress> search = SearchContent.search(item);
+            Object[] vals = new Object[this.getParams().length];
+            for (int i = 0; i < vals.length; i++) {
+                vals[i] = this.getValue(this.getParams()[i], context.getData());
+            }
 
-    private void replace(ParseContext context, List<ReplaceExpress> list) {
-        for (ReplaceExpress express : list) {
-            String exp = express.getExpress();
-            String val = getValue(exp, context.getData()).toString();
-            express.replace(val);
+            for (ReplaceExpress express : search) {
+                String pattern = express.getPattern();
+                String val = new ParamMessage(null, pattern).format(vals);
+                express.replace(val);
+            }
+
         }
     }
 

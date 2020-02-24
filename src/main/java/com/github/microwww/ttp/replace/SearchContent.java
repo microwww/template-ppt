@@ -1,25 +1,40 @@
 package com.github.microwww.ttp.replace;
 
 import org.apache.poi.xslf.usermodel.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.text.Format;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public interface SearchContent {
 
-    public static final Pattern PATTERN = Pattern.compile("\\$\\{[$!=<~>a-zA-Z._0-9/\\[\\]@*?\\(\\)]+\\}");
+    //public static final Pattern PATTERN = Pattern.compile("\\$\\{[0-9]+(,[a-zA-Z]+(,.*+)?)?\\}");
+    public static final Logger logger = LoggerFactory.getLogger(SearchContent.class);
 
     List<ReplaceExpress> search();
 
     public static List<ReplaceExpress> searchExpress(XSLFTextParagraph run) {
-        String text = run.getText();
-        Matcher matcher = PATTERN.matcher(text);
+        String pattern = run.getText();
         List<ReplaceExpress> list = new ArrayList<>();
-        while (matcher.find()) {
-            String group = matcher.group();
-            list.add(new ReplaceExpress(run, group, group.substring(2, group.length() - 1)));
+        for (int i = 0; i < pattern.length(); ) {
+            int idx = pattern.indexOf("${", i);
+            if (idx < 0) {
+                break;
+            }
+            int next = pattern.indexOf('}', idx);
+            if (next < 0) {
+                break;
+            }
+            String search = pattern.substring(idx, next + 1);
+            list.add(new ReplaceExpress(run, search));
+            i = next;
+        }
+        Format[] formats = new MessageFormat(pattern).getFormats();
+        if (list.size() != formats.length) {
+            logger.warn("Please check your MessageFormat text !");
         }
         return list;
     }

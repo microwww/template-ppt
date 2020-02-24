@@ -6,15 +6,14 @@ import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 public class ReplaceExpress {
     private XSLFTextParagraph run;
     private String text;
-    private String express;
 
-    public ReplaceExpress() {
-    }
-
-    public ReplaceExpress(XSLFTextParagraph run, String text, String express) {
+    public ReplaceExpress(XSLFTextParagraph run, String text) {
         this.run = run;
         this.text = text;
-        this.express = express;
+    }
+
+    public String getPattern() {
+        return text.substring(1);
     }
 
     public void replace(String text) {
@@ -30,11 +29,4 @@ public class ReplaceExpress {
         this.text = text;
     }
 
-    public String getExpress() {
-        return express;
-    }
-
-    public void setExpress(String express) {
-        this.express = express;
-    }
 }
