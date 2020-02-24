@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -259,7 +260,7 @@ public abstract class Operation {
             if (idx > 0) {
                 res[i] = new ParamMessage(param.substring(0, idx), param.substring(idx + 1));
             } else {
-                res[i] = new ParamMessage(param, "%s");
+                res[i] = new ParamMessage(param, "{0}");
             }
         }
         return res;
@@ -283,7 +284,7 @@ public abstract class Operation {
         }
 
         public String format(Object... arg) {
-            return String.format(this.pattern, arg);
+            return MessageFormat.format(this.pattern, arg);
         }
     }
 }
