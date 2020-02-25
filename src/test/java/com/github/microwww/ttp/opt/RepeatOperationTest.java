@@ -104,7 +104,7 @@ public class RepeatOperationTest {
 
         RepeatOperation rep = new RepeatOperation();
         rep.setNode(new String[]{"XSLFTable", "0", "XSLFTableRow", "1"});
-        rep.setParams(new String[]{"list", "null", "null", "null", "null", "item.name", "item.age", "null", "null", "null"});
+        rep.setParams(new String[]{"list", "null", "null", "null", "null", "item.name", "item.age", "index+1", "null", "null"});
         rep.parse(context);
 
         ByteArrayOutputStream mem = new ByteArrayOutputStream();
@@ -124,6 +124,8 @@ public class RepeatOperationTest {
         }
         String text = table.getRows().get(size).getCells().get(4).getText();
         assertEquals(list.get(0).getName(), text);
+        text = table.getRows().get(size).getCells().get(6).getText();
+        assertEquals("1", text);
     }
 
     @Test
