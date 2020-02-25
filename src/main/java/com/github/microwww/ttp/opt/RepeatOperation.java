@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.geom.Rectangle2D;
-import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -75,6 +74,7 @@ public class RepeatOperation extends Operation {
         String[] param = this.getParams();
         Assert.isTrue(param.length > 0, "repeat XSLFTable must have [count]");
         List<Object> list = super.getCollectionValue(param[0], context.getData());
+        ItemInfo item = new ItemInfo(context);
         for (int i = 0; i < list.size(); i++) {
             XSLFTableRow nrow = Tools.copyTableRow(table, row);
             List<XSLFTableCell> cells = nrow.getCells();
@@ -82,29 +82,59 @@ public class RepeatOperation extends Operation {
                 if (k + 1 < param.length) {
                     String exp = param[k + 1];
                     XSLFTableCell cell = cells.get(k);
-                    repeat(context, list.get(i), exp, cell);
+                    item.setIndex(i).setItem(list.get(i));
+                    repeat(item, exp, cell);
                 }
             }
 
         }
     }
 
-    public void repeat(ParseContext context, Object obj, String exp, XSLFTextShape cell) {
+    public void repeat(ItemInfo item, String exp, XSLFTextShape cell) {
         ReplaceOperation rp = new ReplaceOperation();
         if (exp.equalsIgnoreCase("null")) {
             rp.setParams(new String[]{});
         } else {
             rp.setParams(new String[]{exp});
         }
-        Object origin = context.getData();
+        Object origin = item.context.getData();
         try {
-            context.setData(Collections.singletonMap("item", obj));
-            rp.replace(context, cell);
+            item.context.setData(item);
+            rp.replace(item.context, cell);
         } catch (Exception e) {// ignore
-            context.setData(origin);
-            rp.replace(context, cell);
+            item.context.setData(origin);
+            rp.replace(item.context, cell);
         } finally {
-            context.setData(origin);
+            item.context.setData(origin);
+        }
+    }
+
+    public static class ItemInfo {
+        private final ParseContext context;
+
+        private Object item;
+        private int index;
+
+        public ItemInfo(ParseContext context) {
+            this.context = context;
+        }
+
+        public Object getItem() {
+            return item;
+        }
+
+        public ItemInfo setItem(Object item) {
+            this.item = item;
+            return this;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public ItemInfo setIndex(int index) {
+            this.index = index;
+            return this;
         }
     }
 
