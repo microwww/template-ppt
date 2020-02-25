@@ -4,8 +4,6 @@ import com.github.microwww.ttp.Assert;
 import com.github.microwww.ttp.Tools;
 import com.github.microwww.ttp.replace.ReplaceExpress;
 import com.github.microwww.ttp.replace.SearchContent;
-import com.github.microwww.ttp.replace.SearchTable;
-import com.github.microwww.ttp.replace.SearchTableRow;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFPieChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFRadarChartData;
@@ -14,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class ReplaceOperation extends Operation {
