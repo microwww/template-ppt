@@ -74,7 +74,7 @@ public class RepeatOperation extends Operation {
         XSLFTable table = DeleteOperation.getTable(context.getTemplate(), row);
         String[] param = this.getParams();
         Assert.isTrue(param.length > 0, "repeat XSLFTable must have [count]");
-        List<Object> list = super.getValue(param[0], context.getData(), List.class);
+        List<Object> list = super.getCollectionValue(param[0], context.getData());
         for (int i = 0; i < list.size(); i++) {
             XSLFTableRow nrow = Tools.copyTableRow(table, row);
             List<XSLFTableCell> cells = nrow.getCells();

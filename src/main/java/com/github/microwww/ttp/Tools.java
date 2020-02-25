@@ -127,7 +127,7 @@ public class Tools {
             rText.setT(start + fix);
             cursor += len;
         }
-        Assert.isTrue(fromRun >= 0 && toRun >= 0, "NOT find message by XML : " + origin + ", check it");
+        // Assert.isTrue(fromRun >= 0 && toRun >= 0, "NOT find message by XML : " + origin + ", check it");
     }
 
     public static XSLFTextParagraph copy(XSLFTextParagraph paragraph) {
