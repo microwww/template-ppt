@@ -1,6 +1,7 @@
 package com.github.microwww.ttp.opt;
 
 import com.github.microwww.ttp.Assert;
+import com.github.microwww.ttp.util.DataUtil;
 import com.github.microwww.ttp.util.DefaultMemberAccess;
 import ognl.*;
 import org.apache.commons.beanutils.MethodUtils;
@@ -78,6 +79,11 @@ public abstract class Operation {
         } catch (OgnlException e) {
             throw new RuntimeException("OGNL express error : " + express, e);
         }
+    }
+
+    public List getCollectionValue(String express, Object model) {
+        Object value = this.getValue(express, model);
+        return DataUtil.toList(value);
     }
 
     public Object getValue(String express, Object model) {

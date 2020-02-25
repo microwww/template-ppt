@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.io.*;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class RepeatOperationTest {
 
@@ -76,25 +76,56 @@ public class RepeatOperationTest {
     }
 
     @Test
-    public void copyTable() throws IOException {
+    public void copyTableRow() throws IOException {
         XMLSlideShow template;
         try (FileInputStream in = new FileInputStream(new File(_HelpTest.PATH, "template.pptx"))) {
             template = new XMLSlideShow(in);
         }
         ParseContext context = new ParseContext(template);
-        XSLFSlide slide = template.getSlides().get(0);
+        XSLFSlide slide = template.getSlides().get(1);
         context.setTemplate(slide);
 
+        XSLFTable table = null; // (XSLFTable) template.getSlides().get(1).getShapes().get(0);
+        for (XSLFShape shapes : template.getSlides().get(1).getShapes()) {
+            if (shapes instanceof XSLFTable) {
+                table = (XSLFTable) shapes;
+                break;
+            }
+        }
+
+        int size = table.getRows().size();
+
+        ArrayList<User> list = new ArrayList<>();
+        list.add(new User("张三", 15));
+        list.add(new User("李四", 11));
+        list.add(new User("王五", 16));
+        list.add(new User("赵六", 19));
+        context.setData(Collections.singletonMap("list", list));
+
         RepeatOperation rep = new RepeatOperation();
-        rep.setNode(new String[]{"XSLFTable", "0"});
-        rep.setParams(new String[]{"'2'", "0,100"});
+        rep.setNode(new String[]{"XSLFTable", "0", "XSLFTableRow", "1"});
+        rep.setParams(new String[]{"list", "null", "null", "null", "null", "item.name", "item.age", "index+1", "null", "null"});
         rep.parse(context);
 
         ByteArrayOutputStream mem = new ByteArrayOutputStream();
         template.write(mem);
-        try (FileOutputStream out = new FileOutputStream(new File("C:\\Users\\charles\\Desktop\\test.ppt"))) {
-            out.write(mem.toByteArray());
+        //try (FileOutputStream out = new FileOutputStream(new File("C:\\Users\\changshu.li\\Desktop\\test.pptx"))) {
+        //    out.write(mem.toByteArray());
+        //}
+        try (InputStream in = new ByteArrayInputStream(mem.toByteArray())) {
+            template = new XMLSlideShow(in);
         }
+
+        for (XSLFShape shapes : template.getSlides().get(1).getShapes()) {
+            if (shapes instanceof XSLFTable) {
+                table = (XSLFTable) shapes;
+                break;
+            }
+        }
+        String text = table.getRows().get(size).getCells().get(4).getText();
+        assertEquals(list.get(0).getName(), text);
+        text = table.getRows().get(size).getCells().get(6).getText();
+        assertEquals("1", text);
     }
 
     @Test
@@ -121,6 +152,32 @@ public class RepeatOperationTest {
             XSLFShape shape = ppt.getSlides().get(0).getShapes().get(0);
             XSLFTable table = (XSLFTable) shape;
             assertEquals(size + 2, table.getRows().size());
+        }
+    }
+
+    public static class User {
+        String name;
+        int age;
+
+        public User(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
         }
     }
 }

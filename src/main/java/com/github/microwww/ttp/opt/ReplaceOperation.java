@@ -2,7 +2,10 @@ package com.github.microwww.ttp.opt;
 
 import com.github.microwww.ttp.Assert;
 import com.github.microwww.ttp.Tools;
-import com.github.microwww.ttp.replace.*;
+import com.github.microwww.ttp.replace.ReplaceExpress;
+import com.github.microwww.ttp.replace.SearchContent;
+import com.github.microwww.ttp.replace.SearchTable;
+import com.github.microwww.ttp.replace.SearchTableRow;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFPieChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFRadarChartData;
@@ -10,8 +13,9 @@ import org.apache.poi.xslf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class ReplaceOperation extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(ReplaceOperation.class);
@@ -46,39 +50,25 @@ public class ReplaceOperation extends Operation {
         Object value = super.getValue(msg.getParam(), context.getData());
         String title = msg.format(value);
 
-        Collection categories = toList(super.getValue(params[1], context.getData()));
+        Collection categories = super.getCollectionValue(params[1], context.getData());
         String[] cts = parse2string(categories);
 
         if (type instanceof XDDFPieChartData) {
-            Collection values = toList(super.getValue(params[2], context.getData()));
+            Collection values = super.getCollectionValue(params[2], context.getData());
             Assert.isTrue(values.size() == categories.size(), "Error CATEGORY.length != VALUE.length");
             Double[] dbs = parse2double(values);
             Tools.setPieDate(chart, title, cts, dbs);
         } else if (type instanceof XDDFRadarChartData) {
-            Collection series = toList(super.getValue(params[2], context.getData()));
+            Collection series = super.getCollectionValue(params[2], context.getData());
             String[] ss = parse2string(series);
             Double[][] dbs = new Double[params.length - 3][];
             for (int i = 0; i < dbs.length; i++) {
-                Collection values = toList(super.getValue(params[i + 3], context.getData()));
+                Collection values = super.getCollectionValue(params[i + 3], context.getData());
                 dbs[i] = parse2double(values);
             }
             Tools.setRadarData(chart, title, cts, ss, dbs);
         }
 
-    }
-
-    public static Collection toList(Object o) {
-        if (o instanceof Collection) {
-            return (Collection) o;
-        } else if (o.getClass().isArray()) {
-            int size = Array.getLength(o);
-            List list = new ArrayList<>();
-            for (int i = 0; i < size; i++) {
-                list.add(Array.get(o, i));
-            }
-            return list;
-        }
-        throw new UnsupportedOperationException("Result must is ARRAY / LIST / COLLECTION");
     }
 
     public static Double[] parse2double(Collection<Object> values) {
