@@ -13,7 +13,9 @@ public class ParseExpressesTest {
     public void parse() throws IOException {
         ParseExpresses exp = new ParseExpresses(new File(this.getClass().getResource("/").getFile(), "demo.txt"));
         exp.parse();
-        assertEquals(14, exp.getOperations().size());
+        assertEquals(8, exp.getOperations().size());
+        assertEquals(2, exp.getOperations().get(5).childrenOperations.size());
+        assertEquals(1, exp.getOperations().get(5).childrenOperations.get(1).childrenOperations.size());
     }
 
 }

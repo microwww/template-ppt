@@ -77,29 +77,11 @@ public class RepeatOperationTest {
 
     @Test
     public void copyTableRow() throws IOException {
-        XMLSlideShow template;
-        try (FileInputStream in = new FileInputStream(new File(_HelpTest.PATH, "template.pptx"))) {
-            template = new XMLSlideShow(in);
-        }
-        ParseContext context = new ParseContext(template);
-        XSLFSlide slide = template.getSlides().get(1);
-        context.setTemplate(slide);
-
-        XSLFTable table = null; // (XSLFTable) template.getSlides().get(1).getShapes().get(0);
-        for (XSLFShape shapes : template.getSlides().get(1).getShapes()) {
-            if (shapes instanceof XSLFTable) {
-                table = (XSLFTable) shapes;
-                break;
-            }
-        }
-
+        ParseContext context = createContext(0);
+        XMLSlideShow template = context.getTemplateShow();
+        XSLFTable table = getTable(context, 1, 0);
+        List<User> list = getDemoList();
         int size = table.getRows().size();
-
-        ArrayList<User> list = new ArrayList<>();
-        list.add(new User("张三", 15));
-        list.add(new User("李四", 11));
-        list.add(new User("王五", 16));
-        list.add(new User("赵六", 19));
         context.setData(Collections.singletonMap("list", list));
 
         RepeatOperation rep = new RepeatOperation();
@@ -123,7 +105,7 @@ public class RepeatOperationTest {
             }
         }
         String text = table.getRows().get(size).getCells().get(4).getText();
-        assertEquals(list.get(0).getName(), text);
+        assertEquals(list.get(0).name, text);
         text = table.getRows().get(size).getCells().get(6).getText();
         assertEquals("1", text);
     }
@@ -155,29 +137,86 @@ public class RepeatOperationTest {
         }
     }
 
+    @Test
+    public void repeatTable() throws IOException {
+        ParseContext context = createContext(1);
+        XMLSlideShow template = context.getTemplateShow();
+        //XSLFTable table = getTable(context, 1, 0);
+        context.addData("list", Arrays.asList(new Group("亚洲", getDemoList()), new Group("欧洲", getDemoList()), new Group("非洲", getDemoList())));
+
+        RepeatOperation rep = new RepeatOperation();
+        rep.setNode(new String[]{"XSLFTable", "0"});
+        rep.setParams(new String[]{"list", "0,50"});
+        {
+            ReplaceOperation rep2 = new ReplaceOperation();
+            rep2.setNode(new String[]{"XSLFTableRow", "0", "XSLFTableCell", "0"});
+            rep2.setParams(new String[]{"item.name"});
+            rep.addChildrenOperation(rep2);
+        }
+        rep.parse(context);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        template.write(bos);
+        {
+            template = new XMLSlideShow(new ByteArrayInputStream(bos.toByteArray()));
+            template.getSlides().get(1);
+        }
+
+        //try (FileOutputStream out = new FileOutputStream(new File("C:\\Users\\changshu.li\\Desktop\\test.pptx"))) {
+        //    template.write(out);
+        //}
+    }
+
+    public static class Group {
+        public final String name;
+        public final List<User> users;
+
+        public Group(String name, List<User> users) {
+            this.name = name;
+            this.users = users;
+        }
+
+    }
+
     public static class User {
-        String name;
-        int age;
+        public final String name;
+        public final int age;
 
         public User(String name, int age) {
             this.name = name;
             this.age = age;
         }
+    }
 
-        public String getName() {
-            return name;
+    public ParseContext createContext(int slide) throws IOException {
+        XMLSlideShow template;
+        try (FileInputStream in = new FileInputStream(new File(_HelpTest.PATH, "template.pptx"))) {
+            template = new XMLSlideShow(in);
         }
+        ParseContext context = new ParseContext(template);
+        context.setTemplate(template.getSlides().get(slide));
+        return context;
+    }
 
-        public void setName(String name) {
-            this.name = name;
+    public XSLFTable getTable(ParseContext context, int slide, int index) {
+        XMLSlideShow template = context.getTemplateShow();
+        XSLFTable table = null; // (XSLFTable) template.getSlides().get(1).getShapes().get(0);
+        int idx = 0;
+        for (XSLFShape shapes : template.getSlides().get(slide).getShapes()) {
+            if (shapes instanceof XSLFTable) {
+                if (index == idx) {
+                    return (XSLFTable) shapes;
+                }
+            }
         }
+        throw new RuntimeException("Not find !");
+    }
 
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
+    public List<User> getDemoList() {
+        ArrayList<User> list = new ArrayList<>();
+        list.add(new User("张三", (int) (Math.random() * 100)));
+        list.add(new User("李四", (int) (Math.random() * 100)));
+        list.add(new User("王五", (int) (Math.random() * 100)));
+        list.add(new User("赵六", (int) (Math.random() * 100)));
+        return list;
     }
 }
