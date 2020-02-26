@@ -5,45 +5,19 @@ import org.apache.poi.xslf.usermodel.XSLFSheet;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 public class ParseContext {
 
-    private static final String name_prefix = ParseContext.class.getName();
-    public static final String TEMPLATE_SHOW = name_prefix + ".TEMPLATE_SHOW";
-    public static final String TEMPLATE = name_prefix + ".TEMPLATE";
-    //public static final String TARGET_SHOW = name_prefix + ".TARGET_SHOW";
-    //public static final String TARGET = name_prefix + ".TARGET";
-
+    private Stack<Object> container = new Stack<>();
     private Object data = new HashMap<>();
 
     public ParseContext(XMLSlideShow template) {
-        map.put(TEMPLATE_SHOW, template);
+        container.add(template);
     }
-
-    private Map<String, Object> map = new HashMap<>();
 
     public XMLSlideShow getTemplateShow() {
-        return (XMLSlideShow) map.get(TEMPLATE_SHOW);
-    }
-
-    public void setTemplateShow(XMLSlideShow templateShow) {
-        map.put(TEMPLATE_SHOW, templateShow);
-    }
-
-    public XSLFSheet getTemplate() {
-        return (XSLFSheet) map.get(TEMPLATE);
-    }
-
-    public void setTemplate(XSLFSheet template) {
-        map.put(TEMPLATE, template);
-    }
-
-    public void putConfig(String key, Object val) {
-        map.put(key, val);
-    }
-
-    public <T> T getConfig(String key, Class<T> t) {
-        return (T) map.get(key);
+        return (XMLSlideShow) container.get(0);
     }
 
     public Object getData() {
@@ -60,5 +34,25 @@ public class ParseContext {
         } else {
             throw new UnsupportedOperationException();
         }
+    }
+
+    public void setTemplate(XSLFSheet sheet) {
+        XMLSlideShow show = this.getTemplateShow();
+        container.clear();
+        container.push(show);
+        container.push(sheet);
+    }
+
+    public XSLFSheet getTemplate() {
+        for (Object o : container) {
+            if (o instanceof XSLFSheet) {
+                return (XSLFSheet) o;
+            }
+        }
+        throw new RuntimeException("Not find XSLFSheet !");
+    }
+
+    public Stack<Object> getContainer() {
+        return container;
     }
 }
