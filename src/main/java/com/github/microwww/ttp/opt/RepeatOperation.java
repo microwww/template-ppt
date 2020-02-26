@@ -10,21 +10,9 @@ import org.slf4j.LoggerFactory;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.List;
-import java.util.Stack;
 
 public class RepeatOperation extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(DeleteOperation.class);
-
-    private static final ThreadLocal<Stack> stack = new ThreadLocal() {
-        @Override
-        protected Stack initialValue() {
-            return new Stack<>();
-        }
-    };
-
-    public static Stack repeatStark() {
-        return stack.get();
-    }
 
     @Override
     public void parse(ParseContext context) {
@@ -123,11 +111,16 @@ public class RepeatOperation extends Operation {
     public void copy(ParseContext context, XSLFTable table) {
         XSLFSheet sheet = context.getTemplate();
         String[] param = this.getParams();
-        Assert.isTrue(param.length > 1, "repeat XSLFTable must have [count, position], tow param");
-        int count = super.getValue(param[0], context.getData(), Integer.class).intValue();
+        Assert.isTrue(param.length > 1, "repeat XSLFTable must have [list/array, position], tow param");
+        List count;
+        try {
+            count = super.getCollectionValue(param[0], context.getData());
+        } catch (RuntimeException e) {// ignore
+            throw new RuntimeException("FIRST param is list/array !", e);
+        }
         String[] ps = param[1].split(",");
         Assert.isTrue(ps.length == 2, "Repeat position.split(',') != 2");
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count.size(); i++) {
             XSLFTable target = Tools.copyTable(sheet, table);
             Rectangle2D anchor = target.getAnchor();
             //anchor = _Help.rectanglePx2point(anchor, 0,0,0,0);
