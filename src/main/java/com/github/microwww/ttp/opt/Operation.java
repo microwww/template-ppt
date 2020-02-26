@@ -15,7 +15,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
 
 public abstract class Operation {
 
@@ -28,7 +27,8 @@ public abstract class Operation {
     private String[] node;
     private String[] params;
 
-    protected final Stack<List<Object>> nodeStack = new Stack();
+    final protected List<Operation> childrenOperations = new ArrayList<>();
+    protected Operation parentOperations;
 
     public abstract void parse(ParseContext context);
 
@@ -56,6 +56,18 @@ public abstract class Operation {
         this.prefix = prefix;
     }
 
+    public Operation getParentOperations() {
+        return parentOperations;
+    }
+
+    public void setParentOperations(Operation parentOperations) {
+        this.parentOperations = parentOperations;
+    }
+
+    public void addChildrenOperation(Operation operation) {
+        this.childrenOperations.add(operation);
+    }
+
     public List<?> search(ParseContext context) {
         String[] exp = getNode();
         Assert.isTrue(exp.length % 2 == 0, "express message pare with shape / index !");
@@ -63,7 +75,7 @@ public abstract class Operation {
         List<Object> content = Collections.singletonList(context.getTemplate());
         for (int i = 0; i < exp.length; i += 2) {
             List<Object> next = new ArrayList<>();
-            nodeStack.push(next);
+            //nodeStack.push(next);
             for (Object cnt : content) {
                 List<Object> list = searchElement(context, cnt, exp[i], exp[i + 1]);
                 next.addAll(list);
@@ -83,6 +95,9 @@ public abstract class Operation {
 
     public List getCollectionValue(String express, Object model) {
         Object value = this.getValue(express, model);
+        if (value == null) {
+            throw new RuntimeException("OGNL Express value is null, NOT list/array");
+        }
         return DataUtil.toList(value);
     }
 

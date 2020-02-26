@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -120,6 +121,7 @@ public class RepeatOperation extends Operation {
         }
         String[] ps = param[1].split(",");
         Assert.isTrue(ps.length == 2, "Repeat position.split(',') != 2");
+        List<XSLFTable> tables = new ArrayList<>();
         for (int i = 0; i < count.size(); i++) {
             XSLFTable target = Tools.copyTable(sheet, table);
             Rectangle2D anchor = target.getAnchor();
@@ -129,6 +131,8 @@ public class RepeatOperation extends Operation {
             Rectangle2D.Double r2d = new Rectangle2D.Double(anchor.getX() + x, anchor.getY() + y, anchor.getWidth() + x, anchor.getHeight() + y);
             //anchor.add(0, i * 2);
             target.setAnchor(r2d);
+            tables.add(table);
         }
+        // TODO :: 未做
     }
 }

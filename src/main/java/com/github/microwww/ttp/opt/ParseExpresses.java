@@ -30,6 +30,7 @@ public class ParseExpresses {
 
     public void parse() throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+        Operation upper = null;
         while (true) {
             String ln = in.readLine();
             if (ln == null) {
@@ -51,7 +52,24 @@ public class ParseExpresses {
                 exps = ln.split(" +");
             }
             Operation operation = toOptions(exps, params);
-            operations.add(operation);
+            String fix = operation.getPrefix();
+            if (fix != null && fix.startsWith(">")) {
+                Assert.isTrue(upper != null, "Express '>' NOT at first");
+                int uplen = 0;
+                if (upper.getPrefix() != null) {
+                    uplen = upper.getPrefix().length();
+                }
+                int len = operation.getPrefix().length();
+                Assert.isTrue(len <= 1 + uplen, "Express '>' count must big-equal Up+1 COUNT");
+                for (int i = 0; i <= uplen - len; i++) {
+                    upper = upper.getParentOperations();
+                }
+                operation.setParentOperations(upper);
+                upper.addChildrenOperation(operation);
+            } else {
+                operations.add(operation);
+            }
+            upper = operation;
         }
     }
 
