@@ -32,6 +32,19 @@ public class DeleteOperation extends Operation {
         }
     }
 
+    public void delete(ParseContext context, XSLFTextParagraph paragraph) {
+        XSLFTextShape shape = paragraph.getParentShape();
+        List<XSLFTextParagraph> pgs = shape.getTextParagraphs();
+        for (int i = 0; i < pgs.size(); i++) {
+            XSLFTextParagraph text = pgs.get(i);
+            if (text == paragraph) {
+                shape.getTextBody().removeParagraph(i);
+                return;
+            }
+        }
+        throw new RuntimeException("Not FIND paragraph !");
+    }
+
     public void delete(ParseContext context, XSLFTableCell cell) {
         XSLFTableRow row = getTableRow(context.getTemplate(), cell);
         List<XSLFTableCell> cells = row.getCells();
