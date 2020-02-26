@@ -38,7 +38,7 @@ public class ParseContext {
         map.put(TEMPLATE, template);
     }
 
-    public void putConifg(String key, Object val) {
+    public void putConfig(String key, Object val) {
         map.put(key, val);
     }
 
