@@ -34,7 +34,8 @@ public class RepeatOperation extends Operation {
         ParamMessage pm = param[0];
         List<Object> data = super.getCollectionValue(pm.getParam(), context.getDataStack());
         List<Object> shapes = new ArrayList<>();
-        for (Object val : data) {
+        shapes.add(sheet);
+        for (int i = 1; i < data.size(); i++) {
             XSLFSlide slide = context.getTemplateShow().createSlide();
             slide = slide.importContent(sheet);
             shapes.add(slide);
@@ -67,16 +68,17 @@ public class RepeatOperation extends Operation {
         Assert.isTrue(param.length > 0, "repeat XSLFTable must have [count]");
         List<Object> data = super.getCollectionValue(param[0], context.getDataStack());
         //ItemInfo item = new ItemInfo();
-        List<XSLFTableRow> rows = new ArrayList<>();
-        for (int i = 0; i < data.size(); i++) {
-            rows.add(Tools.copyTableRow(table, row));
+        List<XSLFTableRow> shapes = new ArrayList<>();
+        shapes.add(row);
+        for (int i = 1; i < data.size(); i++) {
+            shapes.add(Tools.copyTableRow(table, row));
         }
 
         for (int i = 0; i < data.size(); i++) {
             RepeatDomain info = new RepeatDomain();
             info.setItem(data.get(i));
             info.setIndex(i);
-            next(context, rows.get(i), info);
+            next(context, shapes.get(i), info);
         }
     }
 
@@ -110,12 +112,13 @@ public class RepeatOperation extends Operation {
         String[] ps = param[1].split(",");
         Assert.isTrue(ps.length == 2, "Repeat position.split(',') != 2");
         List<XSLFTable> shapes = new ArrayList<>();
-        for (int i = 0; i < data.size(); i++) {
+        shapes.add(table);
+        for (int i = 1; i < data.size(); i++) {
             XSLFTable target = Tools.copyTable(sheet, table);
             Rectangle2D anchor = target.getAnchor();
             //anchor = _Help.rectanglePx2point(anchor, 0,0,0,0);
-            double x = Double.valueOf(ps[0]).doubleValue() * (i + 1);
-            double y = Double.valueOf(ps[1]).doubleValue() * (i + 1);
+            double x = Double.valueOf(ps[0]).doubleValue() * (i);
+            double y = Double.valueOf(ps[1]).doubleValue() * (i);
             Rectangle2D.Double r2d = new Rectangle2D.Double(anchor.getX() + x, anchor.getY() + y, anchor.getWidth() + x, anchor.getHeight() + y);
             //anchor.add(0, i * 2);
             target.setAnchor(r2d);
