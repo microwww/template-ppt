@@ -9,11 +9,14 @@ import java.util.Stack;
 
 public class ParseContext {
 
-    private final Stack<Object> container = new Stack<>();
-    private final Stack<Object> data = new Stack<>();
+    protected final Stack<Object> container = new Stack<>();
+    protected final Stack<Object> data = new Stack<>();
 
     public ParseContext(XMLSlideShow template) {
         container.add(template);
+        if (!template.getSlides().isEmpty()) {
+            container.push(template.getSlides().get(0));
+        }
         data.push(new HashMap<>());
     }
 
@@ -47,7 +50,8 @@ public class ParseContext {
     }
 
     public XSLFSheet getTemplate() {
-        for (Object o : container) {
+        for (int i = container.size(); i > 0; i--) {
+            Object o = container.get(i - 1);
             if (o instanceof XSLFSheet) {
                 return (XSLFSheet) o;
             }
