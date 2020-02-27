@@ -27,6 +27,26 @@ public class RepeatOperation extends Operation {
         logger.warn("Not support copy type : {}", o.getClass());
     }
 
+    public void copy(ParseContext context, XSLFSheet sheet) {
+        // XSLFTextShape content = paragraph.getParentShape();
+        ParamMessage[] param = this.getParamsWithPattern();
+        Assert.isTrue(param.length > 0, "Repeat must has params");
+        ParamMessage pm = param[0];
+        List<Object> data = super.getCollectionValue(pm.getParam(), context.getDataStack());
+        List<Object> shapes = new ArrayList<>();
+        for (Object val : data) {
+            XSLFSlide slide = context.getTemplateShow().createSlide();
+            slide = slide.importContent(sheet);
+            shapes.add(slide);
+        }
+        for (int i = 0; i < data.size(); i++) {
+            RepeatDomain info = new RepeatDomain();
+            info.setItem(data.get(i));
+            info.setIndex(i);
+            next(context, shapes.get(i), info);
+        }
+    }
+
     public void copy(ParseContext context, XSLFTextParagraph paragraph) {
         // XSLFTextShape content = paragraph.getParentShape();
         ParamMessage[] param = this.getParamsWithPattern();
