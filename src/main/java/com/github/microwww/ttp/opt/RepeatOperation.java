@@ -41,7 +41,8 @@ public class RepeatOperation extends Operation {
     }
 
     public void copy(ParseContext context, XSLFTableRow row) {
-        XSLFTable table = DeleteOperation.getTable(context.getTemplate(), row);
+        XSLFTable table = (XSLFTable) context.getContainer().peek();
+        //XSLFTable table = DeleteOperation.getTable(context.getTemplate(), row);
         String[] param = this.getParams();
         Assert.isTrue(param.length > 0, "repeat XSLFTable must have [count]");
         List<Object> data = super.getCollectionValue(param[0], context.getDataStack());
@@ -98,7 +99,7 @@ public class RepeatOperation extends Operation {
             Rectangle2D.Double r2d = new Rectangle2D.Double(anchor.getX() + x, anchor.getY() + y, anchor.getWidth() + x, anchor.getHeight() + y);
             //anchor.add(0, i * 2);
             target.setAnchor(r2d);
-            shapes.add(table);
+            shapes.add(target);
         }
         for (int i = 0; i < data.size(); i++) {
             RepeatDomain info = new RepeatDomain();
