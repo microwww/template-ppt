@@ -133,6 +133,19 @@ public class RepeatOperation extends Operation {
             target.setAnchor(r2d);
             tables.add(table);
         }
-        // TODO :: 未做
+        for (int i = 0; i < count.size(); i++) {
+            try {
+                context.container.push(tables.get(i));
+                context.data.push(count.get(i));
+                for (Operation childrenOperation : this.childrenOperations) {
+                    childrenOperation.setParentOperations(this);
+                    childrenOperation.parse(context);
+                }
+            } finally {
+                context.data.pop();
+                context.container.pop();
+            }
+        }
+
     }
 }
