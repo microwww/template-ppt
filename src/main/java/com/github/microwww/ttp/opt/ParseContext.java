@@ -9,11 +9,12 @@ import java.util.Stack;
 
 public class ParseContext {
 
-    private Stack<Object> container = new Stack<>();
-    private Object data = new HashMap<>();
+    private final Stack<Object> container = new Stack<>();
+    private final Stack<Object> data = new Stack<>();
 
     public ParseContext(XMLSlideShow template) {
         container.add(template);
+        data.push(new HashMap<>());
     }
 
     public XMLSlideShow getTemplateShow() {
@@ -21,16 +22,18 @@ public class ParseContext {
     }
 
     public Object getData() {
-        return data;
+        return data.peek();
     }
 
     public void setData(Object data) {
-        this.data = data;
+        this.data.clear();
+        this.data.push(data);
     }
 
     public void addData(String value, Object data) {
-        if (this.data instanceof Map) {
-            ((Map) this.data).put(value, data);
+        Object peek = this.data.peek();
+        if (peek instanceof Map) {
+            ((Map<String, Object>) peek).put(value, data);
         } else {
             throw new UnsupportedOperationException();
         }
