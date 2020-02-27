@@ -15,6 +15,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 
 public abstract class Operation {
 
@@ -72,7 +73,7 @@ public abstract class Operation {
         String[] exp = getNode();
         Assert.isTrue(exp.length % 2 == 0, "express message pare with shape / index !");
 
-        List<Object> content = Collections.singletonList(context.getTemplate());
+        List<Object> content = Collections.singletonList(context.getContainer().peek());
         for (int i = 0; i < exp.length; i += 2) {
             List<Object> next = new ArrayList<>();
             //nodeStack.push(next);
@@ -85,15 +86,17 @@ public abstract class Operation {
         return content;
     }
 
-    public <T> T getValue(String express, Object model, Class<T> clazz) {
-        try {
-            return (T) Ognl.getValue(express, context, model, clazz);
-        } catch (OgnlException e) {
-            throw new RuntimeException("OGNL express error : " + express, e);
+    public <T> T getValue(String express, Stack<Object> models, Class<T> clazz) {
+        for (int i = models.size(); i > 0; i--) {
+            try {
+                return (T) Ognl.getValue(express, context, models.get(i - 1), clazz);
+            } catch (OgnlException e) {// ignore
+            }
         }
+        throw new RuntimeException("OGNL express error : " + express);
     }
 
-    public List getCollectionValue(String express, Object model) {
+    public List getCollectionValue(String express, Stack<Object> model) {
         Object value = this.getValue(express, model);
         if (value == null) {
             throw new RuntimeException("OGNL Express value is null, NOT list/array");
@@ -101,12 +104,14 @@ public abstract class Operation {
         return DataUtil.toList(value);
     }
 
-    public Object getValue(String express, Object model) {
-        try {
-            return Ognl.getValue(express, context, model);
-        } catch (OgnlException e) {
-            throw new RuntimeException("OGNL express error : " + express, e);
+    public Object getValue(String express, Stack<Object> models) {
+        for (int i = models.size(); i > 0; i--) {
+            try {
+                return Ognl.getValue(express, context, models.get(i - 1));
+            } catch (OgnlException e) {// ignore
+            }
         }
+        throw new RuntimeException("OGNL express error : " + express);
     }
 
     private List<Object> searchElement(ParseContext context, Object content, String exp, String range) {

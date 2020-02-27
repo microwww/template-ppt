@@ -32,7 +32,7 @@ public class RepeatOperation extends Operation {
         ParamMessage[] param = this.getParamsWithPattern();
         Assert.isTrue(param.length > 0, "Repeat must has params");
         ParamMessage pm = param[0];
-        Object os = super.getValue(pm.getParam(), context.getData());
+        Object os = super.getValue(pm.getParam(), context.getDataStack());
         Collection<Object> list = DataUtil.toList(os);
         for (Object val : list) {
             XSLFTextParagraph copy = Tools.copy(paragraph);
@@ -44,85 +44,52 @@ public class RepeatOperation extends Operation {
         XSLFTable table = DeleteOperation.getTable(context.getTemplate(), row);
         String[] param = this.getParams();
         Assert.isTrue(param.length > 0, "repeat XSLFTable must have [count]");
-        List<Object> list = super.getCollectionValue(param[0], context.getData());
-        ItemInfo item = new ItemInfo(context);
-        for (int i = 0; i < list.size(); i++) {
-            XSLFTableRow nrow = Tools.copyTableRow(table, row);
-            List<XSLFTableCell> cells = nrow.getCells();
-            for (int k = 0; k < cells.size(); k++) {
-                if (k + 1 < param.length) {
-                    String exp = param[k + 1];
-                    XSLFTableCell cell = cells.get(k);
-                    item.setIndex(i).setItem(list.get(i));
-                    repeat(item, exp, cell);
-                }
-            }
+        List<Object> data = super.getCollectionValue(param[0], context.getDataStack());
+        //ItemInfo item = new ItemInfo();
+        List<XSLFTableRow> rows = new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            rows.add(Tools.copyTableRow(table, row));
+        }
 
+        for (int i = 0; i < data.size(); i++) {
+            RepeatDomain info = new RepeatDomain();
+            info.setItem(data.get(i));
+            info.setIndex(i);
+            next(context, rows.get(i), info);
         }
     }
 
-    public void repeat(ItemInfo item, String exp, XSLFTextShape cell) {
-        ReplaceOperation rp = new ReplaceOperation();
-        if (exp.equalsIgnoreCase("null")) {
-            rp.setParams(new String[]{});
-        } else {
-            rp.setParams(new String[]{exp});
-        }
-        Object origin = item.context.getData();
-        try {
-            item.context.setData(item);
-            rp.replace(item.context, cell);
-        } catch (Exception e) {// ignore
-            item.context.setData(origin);
-            rp.replace(item.context, cell);
-        } finally {
-            item.context.setData(origin);
-        }
-    }
-
-    public static class ItemInfo {
-        private final ParseContext context;
-
-        private Object item;
-        private int index;
-
-        public ItemInfo(ParseContext context) {
-            this.context = context;
-        }
-
-        public Object getItem() {
-            return item;
-        }
-
-        public ItemInfo setItem(Object item) {
-            this.item = item;
-            return this;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-
-        public ItemInfo setIndex(int index) {
-            this.index = index;
-            return this;
-        }
-    }
-
+    /**
+     * public void repeat(ItemInfo item, String exp, XSLFTextShape cell) {
+     * ReplaceOperation rp = new ReplaceOperation();
+     * if (exp.equalsIgnoreCase("null")) {
+     * rp.setParams(new String[]{});
+     * } else {
+     * rp.setParams(new String[]{exp});
+     * }
+     * Stack<Object> origin = item.context.getDataStack();
+     * try {
+     * item.context.getDataStack().push(item);
+     * rp.replace(item.context, cell);
+     * } finally {
+     * item.context.getDataStack().pop();
+     * }
+     * }
+     **/
     public void copy(ParseContext context, XSLFTable table) {
         XSLFSheet sheet = context.getTemplate();
         String[] param = this.getParams();
         Assert.isTrue(param.length > 1, "repeat XSLFTable must have [list/array, position], tow param");
-        List count;
+        List<Object> data;
         try {
-            count = super.getCollectionValue(param[0], context.getData());
+            data = super.getCollectionValue(param[0], context.getDataStack());
         } catch (RuntimeException e) {// ignore
             throw new RuntimeException("FIRST param is list/array !", e);
         }
         String[] ps = param[1].split(",");
         Assert.isTrue(ps.length == 2, "Repeat position.split(',') != 2");
-        List<XSLFTable> tables = new ArrayList<>();
-        for (int i = 0; i < count.size(); i++) {
+        List<XSLFTable> shapes = new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
             XSLFTable target = Tools.copyTable(sheet, table);
             Rectangle2D anchor = target.getAnchor();
             //anchor = _Help.rectanglePx2point(anchor, 0,0,0,0);
@@ -131,21 +98,27 @@ public class RepeatOperation extends Operation {
             Rectangle2D.Double r2d = new Rectangle2D.Double(anchor.getX() + x, anchor.getY() + y, anchor.getWidth() + x, anchor.getHeight() + y);
             //anchor.add(0, i * 2);
             target.setAnchor(r2d);
-            tables.add(table);
+            shapes.add(table);
         }
-        for (int i = 0; i < count.size(); i++) {
-            try {
-                context.container.push(tables.get(i));
-                context.data.push(count.get(i));
-                for (Operation childrenOperation : this.childrenOperations) {
-                    childrenOperation.setParentOperations(this);
-                    childrenOperation.parse(context);
-                }
-            } finally {
-                context.data.pop();
-                context.container.pop();
-            }
+        for (int i = 0; i < data.size(); i++) {
+            RepeatDomain info = new RepeatDomain();
+            info.setItem(data.get(i));
+            info.setIndex(i);
+            next(context, shapes.get(i), info);
         }
+    }
 
+    private void next(ParseContext context, Object shape, RepeatDomain info) {
+        try {
+            context.getContainer().push(shape);
+            context.getDataStack().push(info);
+            for (Operation childrenOperation : this.childrenOperations) {
+                childrenOperation.setParentOperations(this);
+                childrenOperation.parse(context);
+            }
+        } finally {
+            context.getDataStack().pop();
+            context.getContainer().pop();
+        }
     }
 }

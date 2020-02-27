@@ -44,23 +44,23 @@ public class ReplaceOperation extends Operation {
         Assert.isTrue(params.length >= 3, "Chart data [title, category[], data[]], Must 3 params value");
 
         ParamMessage msg = this.getParamsWithPattern()[0];
-        Object value = super.getValue(msg.getParam(), context.getData());
+        Object value = super.getValue(msg.getParam(), context.getDataStack());
         String title = msg.format(value);
 
-        Collection categories = super.getCollectionValue(params[1], context.getData());
+        Collection categories = super.getCollectionValue(params[1], context.getDataStack());
         String[] cts = parse2string(categories);
 
         if (type instanceof XDDFPieChartData) {
-            Collection values = super.getCollectionValue(params[2], context.getData());
+            Collection values = super.getCollectionValue(params[2], context.getDataStack());
             Assert.isTrue(values.size() == categories.size(), "Error CATEGORY.length != VALUE.length");
             Double[] dbs = parse2double(values);
             Tools.setPieDate(chart, title, cts, dbs);
         } else if (type instanceof XDDFRadarChartData) {
-            Collection series = super.getCollectionValue(params[2], context.getData());
+            Collection series = super.getCollectionValue(params[2], context.getDataStack());
             String[] ss = parse2string(series);
             Double[][] dbs = new Double[params.length - 3][];
             for (int i = 0; i < dbs.length; i++) {
-                Collection values = super.getCollectionValue(params[i + 3], context.getData());
+                Collection values = super.getCollectionValue(params[i + 3], context.getDataStack());
                 dbs[i] = parse2double(values);
             }
             Tools.setRadarData(chart, title, cts, ss, dbs);
@@ -97,7 +97,7 @@ public class ReplaceOperation extends Operation {
         if (this.getParams().length == 1) {
             StringBuffer buffer = new StringBuffer();
             for (ParamMessage param : this.getParamsWithPattern()) {
-                Object val = getValue(param.getParam(), context.getData());
+                Object val = getValue(param.getParam(), context.getDataStack());
                 buffer.append(param.format(val));
             }
             Tools.setTextShapeWithStyle(item, buffer.toString());
@@ -105,7 +105,7 @@ public class ReplaceOperation extends Operation {
             List<ReplaceExpress> search = SearchContent.search(item);
             Object[] vals = new Object[this.getParams().length];
             for (int i = 0; i < vals.length; i++) {
-                vals[i] = this.getValue(this.getParams()[i], context.getData());
+                vals[i] = this.getValue(this.getParams()[i], context.getDataStack());
             }
 
             for (ReplaceExpress express : search) {

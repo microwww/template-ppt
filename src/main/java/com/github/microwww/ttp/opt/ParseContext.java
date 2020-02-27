@@ -9,8 +9,8 @@ import java.util.Stack;
 
 public class ParseContext {
 
-    protected final Stack<Object> container = new Stack<>();
-    protected final Stack<Object> data = new Stack<>();
+    private final Stack<Object> container = new Stack<>();
+    private final Stack<Object> data = new Stack<>();
 
     public ParseContext(XMLSlideShow template) {
         container.add(template);
@@ -24,8 +24,13 @@ public class ParseContext {
         return (XMLSlideShow) container.get(0);
     }
 
-    public Object getData() {
-        return data.peek();
+    public Stack<Object> getDataStack() {
+        return data;
+    }
+
+    public Stack<Object> pushData(Object data) {
+        this.data.push(data);
+        return this.data;
     }
 
     public void setData(Object data) {
