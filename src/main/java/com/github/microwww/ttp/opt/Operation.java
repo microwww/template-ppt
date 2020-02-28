@@ -187,8 +187,8 @@ public abstract class Operation {
             String cname = "org.apache.poi.xslf.usermodel." + exp;
             try {
                 Class clazz = Class.forName(cname);
-                for (XSLFShape shape : slide.getShapes()) {
-                    if (clazz.isInstance(shape)) {
+                if (XSLFSlide.class.equals(clazz)) {
+                    for (XSLFSlide shape : slide.getSlideShow().getSlides()) {
                         for (Range rg : list) {
                             if (rg.isIn(idx)) {
                                 res.add(shape);
@@ -197,7 +197,18 @@ public abstract class Operation {
                         }
                         idx++;
                     }
-                }
+                } else
+                    for (XSLFShape shape : slide.getShapes()) {
+                        if (clazz.isInstance(shape)) {
+                            for (Range rg : list) {
+                                if (rg.isIn(idx)) {
+                                    res.add(shape);
+                                    break;
+                                }
+                            }
+                            idx++;
+                        }
+                    }
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("Exception not support ! Must in package: org.apache.poi.xslf.usermodel", e);
             }
