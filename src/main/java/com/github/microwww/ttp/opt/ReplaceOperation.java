@@ -4,6 +4,7 @@ import com.github.microwww.ttp.Assert;
 import com.github.microwww.ttp.Tools;
 import com.github.microwww.ttp.replace.ReplaceExpress;
 import com.github.microwww.ttp.replace.SearchContent;
+import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFPieChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFRadarChartData;
@@ -55,7 +56,7 @@ public class ReplaceOperation extends Operation {
             Assert.isTrue(values.size() == categories.size(), "Error CATEGORY.length != VALUE.length");
             Double[] dbs = parse2double(values);
             Tools.setPieDate(chart, title, cts, dbs);
-        } else if (type instanceof XDDFRadarChartData) {
+        } else if (type instanceof XDDFRadarChartData || type instanceof XDDFBarChartData) {
             Collection series = super.getCollectionValue(params[2], context.getDataStack());
             String[] ss = parse2string(series);
             Double[][] dbs = new Double[params.length - 3][];
