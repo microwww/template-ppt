@@ -87,6 +87,16 @@ public class RepeatOperation extends Operation {
             info.setIndex(i);
             next(context, shapes.get(i), info);
         }
+        if (data.isEmpty()) {
+            int size = table.getRows().size();
+            for (int i = 0; i < size; i++) {
+                XSLFTableRow tr = table.getRows().get(i);
+                if (tr.equals(row)) {
+                    table.removeRow(i);
+                    break;
+                }
+            }
+        }
     }
 
     /**
