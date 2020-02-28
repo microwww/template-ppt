@@ -4,11 +4,11 @@ import com.github.microwww.ttp.Tools;
 import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
 
 public class ReplaceExpress {
-    private XSLFTextParagraph run;
+    private XSLFTextParagraph paragraph;
     private String text;
 
-    public ReplaceExpress(XSLFTextParagraph run, String text) {
-        this.run = run;
+    public ReplaceExpress(XSLFTextParagraph paragraph, String text) {
+        this.paragraph = paragraph;
         this.text = text;
     }
 
@@ -17,7 +17,7 @@ public class ReplaceExpress {
     }
 
     public void replace(String text) {
-        Tools.replace(run, this.text, text);
+        Tools.replace(paragraph, this.text, text);
         //run.setText(StringUtils.replace(run.getRawText(), this.text, text));
     }
 

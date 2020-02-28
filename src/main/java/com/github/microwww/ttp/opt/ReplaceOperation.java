@@ -86,8 +86,21 @@ public class ReplaceOperation extends Operation {
         return cts;
     }
 
+    public void replace(ParseContext context, XSLFTextParagraph paragraph) {
+        List<ReplaceExpress> exps = SearchContent.searchExpress(paragraph);
+        if (exps.isEmpty()) {
+            StringBuffer buffer = new StringBuffer();
+            for (ParamMessage param : this.getParamsWithPattern()) {
+                Object val = getValue(param.getParam(), context.getDataStack());
+                buffer.append(param.format(val));
+            }
+            Tools.setParagraphText(paragraph, buffer.toString());
+        } else {
+            this.writeShape(context, exps);
+        }
+    }
+
     public void replace(ParseContext context, XSLFTableRow item) {
-        List<ReplaceExpress> list = SearchContent.search(item);
         for (XSLFTableCell cell : item.getCells()) {
             replace(context, cell);
         }
@@ -103,17 +116,20 @@ public class ReplaceOperation extends Operation {
             Tools.setTextShapeWithStyle(item, buffer.toString());
         } else {
             List<ReplaceExpress> search = SearchContent.search(item);
-            Object[] vals = new Object[this.getParams().length];
-            for (int i = 0; i < vals.length; i++) {
-                vals[i] = this.getValue(this.getParams()[i], context.getDataStack());
-            }
+            writeShape(context, search);
+        }
+    }
 
-            for (ReplaceExpress express : search) {
-                String pattern = express.getPattern();
-                String val = new ParamMessage(null, pattern).format(vals);
-                express.replace(val);
-            }
+    public void writeShape(ParseContext context, List<ReplaceExpress> search) {
+        Object[] vals = new Object[this.getParams().length];
+        for (int i = 0; i < vals.length; i++) {
+            vals[i] = this.getValue(this.getParams()[i], context.getDataStack());
+        }
 
+        for (ReplaceExpress express : search) {
+            String pattern = express.getPattern();
+            String val = new ParamMessage(null, pattern).format(vals);
+            express.replace(val);
         }
     }
 
