@@ -43,7 +43,8 @@ public class RepeatOperation extends Operation {
             slide = slide.importContent(sheet);
             shapes.add(slide);
         }
-        for (int i = 0; i < data.size(); i++) {
+        for (int k = 0; k < data.size(); k++) {
+            int i = (k + 1) % data.size(); // 模板放到最后
             RepeatDomain info = new RepeatDomain();
             info.setItem(data.get(i));
             info.setIndex(i);
@@ -79,7 +80,8 @@ public class RepeatOperation extends Operation {
             shapes.add(Tools.copyTableRow(table, row));
         }
 
-        for (int i = 0; i < data.size(); i++) {
+        for (int k = 0; k < data.size(); k++) {
+            int i = (k + 1) % data.size(); // 模板放到最后
             RepeatDomain info = new RepeatDomain();
             info.setItem(data.get(i));
             info.setIndex(i);
@@ -129,7 +131,8 @@ public class RepeatOperation extends Operation {
             target.setAnchor(r2d);
             shapes.add(target);
         }
-        for (int i = 0; i < data.size(); i++) {
+        for (int k = 0; k < data.size(); k++) {
+            int i = (k + 1) % data.size(); // 模板放到最后
             RepeatDomain info = new RepeatDomain();
             info.setItem(data.get(i));
             info.setIndex(i);
