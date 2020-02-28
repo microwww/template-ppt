@@ -11,15 +11,18 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Stack;
 
 public class RepeatOperation extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(DeleteOperation.class);
+    private static final ThreadLocal<Stack<Object>> local = new ThreadLocal<>();
 
     @Override
     public void parse(ParseContext context) {
-        List<?> search = super.search(context);
-        for (Object item : search) {
-            thisInvoke("copy", context, item);
+        List<Stack<Object>> search = super.searchStack(context);
+        for (Stack<Object> item : search) {
+            local.set(item);
+            thisInvoke("copy", context, item.peek());
         }
     }
 
@@ -62,7 +65,9 @@ public class RepeatOperation extends Operation {
     }
 
     public void copy(ParseContext context, XSLFTableRow row) {
-        XSLFTable table = (XSLFTable) context.getContainer().peek();
+        Stack<Object> stack = local.get();
+        XSLFTable table = (XSLFTable) stack.get(stack.size() - 2);
+        // XSLFTable table = (XSLFTable) context.getContainer().peek();
         //XSLFTable table = DeleteOperation.getTable(context.getTemplate(), row);
         String[] param = this.getParams();
         Assert.isTrue(param.length > 0, "repeat XSLFTable must have [count]");

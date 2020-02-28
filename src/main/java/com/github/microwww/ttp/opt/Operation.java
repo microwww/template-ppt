@@ -70,16 +70,32 @@ public abstract class Operation {
     }
 
     public List<?> search(ParseContext context) {
+        List<Stack<Object>> stacks = this.searchStack(context);
+        List<Object> res = new ArrayList<>();
+        for (Stack<Object> stack : stacks) {
+            res.add(stack.peek());
+        }
+        return res;
+    }
+
+    public List<Stack<Object>> searchStack(ParseContext context) {
         String[] exp = getNode();
         Assert.isTrue(exp.length % 2 == 0, "express message pare with shape / index !");
-
-        List<Object> content = Collections.singletonList(context.getContainer().peek());
+        Stack<Object> stack = new Stack<>();
+        stack.addAll(context.getContainer());
+        List<Stack<Object>> content = Collections.singletonList(stack);
         for (int i = 0; i < exp.length; i += 2) {
-            List<Object> next = new ArrayList<>();
+            List<Stack<Object>> next = new ArrayList<>();
             //nodeStack.push(next);
-            for (Object cnt : content) {
-                List<Object> list = searchElement(context, cnt, exp[i], exp[i + 1]);
-                next.addAll(list);
+            for (Stack<Object> cnt : content) {
+                List<Object> list = searchElement(context, cnt.peek(), exp[i], exp[i + 1]);
+                // next.addAll(list);
+                for (Object last : list) {
+                    Stack st = new Stack<>();
+                    st.addAll(cnt);
+                    st.push(last);
+                    next.add(st);
+                }
             }
             content = next;
         }
