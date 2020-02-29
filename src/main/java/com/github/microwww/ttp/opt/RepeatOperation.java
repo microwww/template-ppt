@@ -45,14 +45,8 @@ public class RepeatOperation extends Operation {
             shapes.add(slide);
         }
 
-        Integer index = null;
-        for (int i = 0; i < show.getSlides().size(); i++) {
-            XSLFSlide slide = show.getSlides().get(i);
-            if (slide.equals(sheet)) {
-                index = i;
-            }
-        }
-        Assert.isTrue(index != null, "Not find sheet-slide");
+        int index = sheet.getSlideNumber() - 1;
+        Assert.isTrue(index >= 0, "slide index must >= 0");
         for (int k = 0; k < data.size(); k++) {
             int i = (k + 1) % data.size(); // 模板放到最后
             RepeatDomain info = new RepeatDomain();
