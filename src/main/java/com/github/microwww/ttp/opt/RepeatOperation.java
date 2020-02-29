@@ -30,26 +30,38 @@ public class RepeatOperation extends Operation {
         logger.warn("Not support copy type : {}", o.getClass());
     }
 
-    public void copy(ParseContext context, XSLFSheet sheet) {
+    public void copy(ParseContext context, XSLFSlide sheet) {
         // XSLFTextShape content = paragraph.getParentShape();
         ParamMessage[] param = this.getParamsWithPattern();
         Assert.isTrue(param.length > 0, "Repeat must has params");
         ParamMessage pm = param[0];
         List<Object> data = super.getCollectionValue(pm.getParam(), context.getDataStack());
-        List<Object> shapes = new ArrayList<>();
-        shapes.add(sheet);
+        List<XSLFSlide> shapes = new ArrayList<>();
+        XMLSlideShow show = context.getTemplateShow();
+        shapes.add(sheet);// 需要排序, 跟 data 的 setting 顺序一致
         for (int i = 1; i < data.size(); i++) {
-            XSLFSlide slide = context.getTemplateShow().createSlide();
+            XSLFSlide slide = show.createSlide();
             slide = slide.importContent(sheet);
             shapes.add(slide);
         }
+
+        Integer index = null;
+        for (int i = 0; i < show.getSlides().size(); i++) {
+            XSLFSlide slide = show.getSlides().get(i);
+            if (slide.equals(sheet)) {
+                index = i;
+            }
+        }
+        Assert.isTrue(index != null, "Not find sheet-slide");
         for (int k = 0; k < data.size(); k++) {
             int i = (k + 1) % data.size(); // 模板放到最后
             RepeatDomain info = new RepeatDomain();
             info.setItem(data.get(i));
             info.setIndex(i);
             next(context, shapes.get(i), info);
+            show.setSlideOrder(shapes.get(i), index + i);
         }
+
     }
 
     public void copy(ParseContext context, XSLFTextParagraph paragraph) {
