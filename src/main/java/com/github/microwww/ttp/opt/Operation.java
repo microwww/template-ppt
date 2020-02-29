@@ -103,6 +103,7 @@ public abstract class Operation {
     }
 
     public <T> T getValue(String express, Stack<Object> models, Class<T> clazz) {
+        tryParent(models);
         for (int i = models.size(); i > 0; i--) {
             try {
                 return (T) Ognl.getValue(express, context, models.get(i - 1), clazz);
@@ -121,6 +122,7 @@ public abstract class Operation {
     }
 
     public Object getValue(String express, Stack<Object> models) {
+        tryParent(models);
         for (int i = models.size(); i > 0; i--) {
             try {
                 return Ognl.getValue(express, context, models.get(i - 1));
@@ -128,6 +130,17 @@ public abstract class Operation {
             }
         }
         throw new RuntimeException("OGNL express error : " + express);
+    }
+
+    public void tryParent(Stack<Object> models) {
+        Object next = null;
+        for (int k = 0; k < models.size(); k++) {
+            Object md = models.get(k);
+            if (md instanceof RepeatDomain) {
+                ((RepeatDomain) md).setParent(next);
+            }
+            next = models.get(k);
+        }
     }
 
     private List<Object> searchElement(ParseContext context, Object content, String exp, String range) {
