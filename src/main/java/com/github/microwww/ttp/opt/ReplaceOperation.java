@@ -107,6 +107,14 @@ public class ReplaceOperation extends Operation {
         }
     }
 
+    public void replace(ParseContext context, XSLFTextBox box) {
+        this.replace(context, (XSLFTextShape) box);
+    }
+
+    public void replace(ParseContext context, XSLFTableCell cell) {
+        this.replace(context, (XSLFTextShape) cell);
+    }
+
     public void replace(ParseContext context, XSLFTextShape item) {
         if (this.getParams().length == 1) {
             StringBuffer buffer = new StringBuffer();
