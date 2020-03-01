@@ -25,7 +25,7 @@ public class ReplaceOperation extends Operation {
     public void parse(ParseContext context) {
         List<?> search = super.search(context);
         for (Object o : search) {
-            thisInvoke("replace", new Object[]{context, o});
+            thisInvoke("replace", context, o);
         }
     }
 
@@ -48,20 +48,23 @@ public class ReplaceOperation extends Operation {
         Object value = super.getValue(msg.getParam(), context.getDataStack());
         String title = msg.format(value);
 
-        Collection categories = super.getCollectionValue(params[1], context.getDataStack());
+        List categories = super.getCollectionValue(params[1], context.getDataStack());
         String[] cts = parse2string(categories);
 
         if (type instanceof XDDFPieChartData) {
-            Collection values = super.getCollectionValue(params[2], context.getDataStack());
+            List values = super.getCollectionValue(params[2], context.getDataStack());
             Assert.isTrue(values.size() == categories.size(), "Error CATEGORY.length != VALUE.length");
             Double[] dbs = parse2double(values);
             Tools.setPieDate(chart, title, cts, dbs);
-        } else if (type instanceof XDDFRadarChartData || type instanceof XDDFBarChartData) {
-            Collection series = super.getCollectionValue(params[2], context.getDataStack());
+        } else {
+            if (!(type instanceof XDDFRadarChartData) && !(type instanceof XDDFBarChartData)){
+                logger.warn("UNKNOWN Chart type : {}, ", type);
+            }
+            List series = super.getCollectionValue(params[2], context.getDataStack());
             String[] ss = parse2string(series);
             Double[][] dbs = new Double[params.length - 3][];
             for (int i = 0; i < dbs.length; i++) {
-                Collection values = super.getCollectionValue(params[i + 3], context.getDataStack());
+                List values = super.getCollectionValue(params[i + 3], context.getDataStack());
                 dbs[i] = parse2double(values);
             }
             Tools.setRadarData(chart, title, cts, ss, dbs);
@@ -90,7 +93,7 @@ public class ReplaceOperation extends Operation {
     public void replace(ParseContext context, XSLFTextParagraph paragraph) {
         List<ReplaceExpress> exps = SearchContent.searchExpress(paragraph);
         if (exps.isEmpty()) {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for (ParamMessage param : this.getParamsWithPattern()) {
                 Object val = getValue(param.getParam(), context.getDataStack());
                 buffer.append(param.format(val));
@@ -117,7 +120,7 @@ public class ReplaceOperation extends Operation {
 
     public void replace(ParseContext context, XSLFTextShape item) {
         if (this.getParams().length == 1) {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for (ParamMessage param : this.getParamsWithPattern()) {
                 Object val = getValue(param.getParam(), context.getDataStack());
                 buffer.append(param.format(val));
