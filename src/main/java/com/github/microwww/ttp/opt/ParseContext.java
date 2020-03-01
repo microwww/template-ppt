@@ -2,12 +2,20 @@ package com.github.microwww.ttp.opt;
 
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
 public class ParseContext {
+    private static final Logger logger = LoggerFactory.getLogger(ParseContext.class);
 
     private final Stack<Object> container = new Stack<>();
     private final Stack<Object> data = new Stack<>();
@@ -66,5 +74,22 @@ public class ParseContext {
 
     public Stack<Object> getContainer() {
         return container;
+    }
+
+    public void parse(InputStream format, OutputStream out) throws IOException {
+        ParseExpresses exp = new ParseExpresses(format);
+        exp.parse();
+        List<Operation> opts = exp.getOperations();
+
+        for (Operation opt : opts) {
+            try {
+                opt.parse(this);
+            } catch (RuntimeException e) {
+                logger.error("OPERATION : {} ( {} )", opt.getPrefix(), opt.getNode(), opt.getParams());
+                throw e;
+            }
+        }
+
+        this.getTemplateShow().write(out);
     }
 }

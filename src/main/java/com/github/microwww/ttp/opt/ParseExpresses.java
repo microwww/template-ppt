@@ -20,7 +20,7 @@ public class ParseExpresses {
         this.inputStream = new FileInputStream(file);
     }
 
-    public ParseExpresses(InputStream inputStream) throws FileNotFoundException {
+    public ParseExpresses(InputStream inputStream) {
         this.inputStream = inputStream;
     }
 

@@ -1,9 +1,11 @@
-package org.apache.poi.xslf.usermodel;
+package com.github.microwww.ttp.util;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.Units;
+import org.apache.poi.xslf.usermodel.*;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTGraphicalObjectData;
@@ -15,6 +17,8 @@ import javax.xml.namespace.QName;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -26,17 +30,19 @@ public class _Help {
         dest.getCTTable().set(src.getCTTable().copy());
 
         List<CTTableRow> tr = dest.getCTTable().getTrList();
-        for (CTTableRow row : tr) {
-            try {
+        try {
+            for (CTTableRow row : tr) {
                 List<XSLFTableRow> rows = (List<XSLFTableRow>)
                         FieldUtils.readDeclaredField(dest, "_rows", true);
-                rows.add(new XSLFTableRow(row, dest));
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("error! this invoke private method ...", e);
+                Constructor<XSLFTableRow> constructor = XSLFTableRow.class.getDeclaredConstructor(CTTableRow.class, XSLFTable.class);
+                constructor.setAccessible(true);
+                rows.add(constructor.newInstance(row, dest));
+                MethodUtils.invokeMethod(dest, true, "updateRowColIndexes");
             }
-            dest.updateRowColIndexes();
+            MethodUtils.invokeMethod(dest, true, "copy", src);
+        } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
+            throw new RuntimeException("error! this invoke private method ...", e);
         }
-        dest.copy(src);
         return dest;
     }
 
@@ -48,8 +54,10 @@ public class _Help {
             try {
                 List<XSLFTableCell> _cells = (List<XSLFTableCell>)
                         FieldUtils.readDeclaredField(row, "_cells", true);
-                _cells.add(new XSLFTableCell(tc, table));
-            } catch (IllegalAccessException e) {
+                Constructor<XSLFTableCell> constructor = XSLFTableCell.class.getDeclaredConstructor(CTTableCell.class, XSLFTable.class);
+                constructor.setAccessible(true);
+                _cells.add(constructor.newInstance(tc, table));
+            } catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
         }

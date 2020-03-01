@@ -1,5 +1,6 @@
 package org.apache.poi.xslf.usermodel;
 
+import com.github.microwww.ttp.util._Help;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Assert;
 import org.junit.Test;
