@@ -59,10 +59,16 @@ public class RepeatOperation extends Operation {
         Assert.isTrue(param.length > 0, "Repeat must has params");
         ParamMessage pm = param[0];
         Object os = super.getValue(pm.getParam(), context.getDataStack());
-        Collection<Object> list = DataUtil.toList(os);
-        for (Object val : list) {
-            XSLFTextParagraph copy = Tools.copy(paragraph);
-            Tools.replace(copy, paragraph.getText(), pm.format(val));
+        List<Object> data = DataUtil.toList(os);
+        int size = data.size();
+        List<XSLFTextParagraph> res = new ArrayList<>(size);
+        res.add(paragraph);
+        for (int i = 1; i < size; i++) {
+            res.add(Tools.copy(paragraph));
+        }
+        for (int i = 1; i <= size; i++) {
+            int k = i % size;
+            Tools.replace(res.get(k), paragraph.getText(), pm.format(data.get(k)));
         }
     }
 
