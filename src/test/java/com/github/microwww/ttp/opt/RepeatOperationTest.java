@@ -146,11 +146,35 @@ public class RepeatOperationTest {
 
         RepeatOperation rep = new RepeatOperation();
         rep.setNode(new String[]{"XSLFTable", "0"});
-        rep.setParams(new String[]{"list", "0,50"});
+        rep.setParams(new String[]{"list", "0,100"});
         {
             ReplaceOperation rep2 = new ReplaceOperation();
             rep2.setNode(new String[]{"XSLFTableRow", "0", "XSLFTableCell", "0"});
             rep2.setParams(new String[]{"item.name"});
+            rep.addChildrenOperation(rep2);
+        }
+        {
+            RepeatOperation rep2 = new RepeatOperation();
+            rep2.setNode(new String[]{"XSLFTableRow", "1"});
+            rep2.setParams(new String[]{"item.users"});
+            rep.addChildrenOperation(rep2);
+            {
+                ReplaceOperation rep3 = new ReplaceOperation();
+                rep3.setNode(new String[]{"XSLFTableCell", "6"});
+                rep3.setParams(new String[]{"item.name"});
+                rep2.addChildrenOperation(rep3);
+            }
+            {
+                ReplaceOperation rep3 = new ReplaceOperation();
+                rep3.setNode(new String[]{"XSLFTableCell", "5"});
+                rep3.setParams(new String[]{"item.age"});
+                rep2.addChildrenOperation(rep3);
+            }
+        }
+        {
+            DeleteOperation rep2 = new DeleteOperation();
+            rep2.setNode(new String[]{"XSLFTableRow", "1-4"});
+            rep2.setParams(new String[]{});
             rep.addChildrenOperation(rep2);
         }
         rep.parse(context);
@@ -161,9 +185,9 @@ public class RepeatOperationTest {
             template.getSlides().get(1);
         }
 
-        //try (FileOutputStream out = new FileOutputStream(new File("C:\\Users\\changshu.li\\Desktop\\test.pptx"))) {
-        //    template.write(out);
-        //}
+        try (FileOutputStream out = new FileOutputStream(new File("C:\\Users\\charles\\Desktop\\test.pptx"))) {
+            template.write(out);
+        }
     }
 
     public static class Group {

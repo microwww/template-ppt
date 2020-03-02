@@ -21,7 +21,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public class _Help {
 
@@ -64,10 +63,13 @@ public class _Help {
         return row;
     }
 
-    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest) {
-        return copyChart(src, index, dest, (c, v) -> {
-            Rectangle point = rectanglePx2point(v.getGraphic().getAnchor(), 0, 0, 0, 0);
-            dest.addChart(c, point);
+    public static XSLFChart copyChart(XSLFSheet src, int index, final XSLFSheet dest) {
+        return copyChart(src, index, dest, new BiConsumer<XSLFChart, XSLFGraphicChart>() {
+            @Override
+            public void accept(XSLFChart c, XSLFGraphicChart v) {
+                Rectangle point = rectanglePx2point(v.getGraphic().getAnchor(), 0, 0, 0, 0);
+                dest.addChart(c, point);
+            }
         });
     }
 

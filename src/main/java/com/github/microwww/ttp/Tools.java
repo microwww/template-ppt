@@ -1,5 +1,6 @@
 package com.github.microwww.ttp;
 
+import com.github.microwww.ttp.util.BiConsumer;
 import com.github.microwww.ttp.util._Help;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.*;
@@ -38,17 +39,21 @@ public class Tools {
         return _Help.copyChart(src, index, dest);
     }
 
-    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest, Rectangle2D delta) {
-        return _Help.copyChart(src, index, dest, (chart, val) -> {
-            Rectangle2D point = rectanglePx2point(val.getGraphic().getAnchor(), delta.getX(), delta.getY(), delta.getWidth(),
-                    delta.getHeight());
-            dest.addChart(chart, point);
+    public static XSLFChart copyChart(XSLFSheet src, int index, final XSLFSheet dest, final Rectangle2D delta) {
+        return _Help.copyChart(src, index, dest, new BiConsumer<XSLFChart, XSLFGraphicChart>() {
+            public void accept(XSLFChart chart, XSLFGraphicChart val) {
+                Rectangle2D point = rectanglePx2point(val.getGraphic().getAnchor(), delta.getX(), delta.getY(), delta.getWidth(),
+                        delta.getHeight());
+                dest.addChart(chart, point);
+            }
         });
     }
 
-    public static XSLFChart copyChart(XSLFSheet src, int index, XSLFSheet dest, Rectangle position) {
-        return _Help.copyChart(src, index, dest, (chart, val) -> {
-            dest.addChart(chart, position); //rectanglePx2point(val.getKey().getAnchor(), 0, 0, 0, 0));
+    public static XSLFChart copyChart(XSLFSheet src, int index, final XSLFSheet dest, final Rectangle position) {
+        return _Help.copyChart(src, index, dest, new BiConsumer<XSLFChart, XSLFGraphicChart>() {
+            public void accept(XSLFChart chart, XSLFGraphicChart val) {
+                dest.addChart(chart, position); //rectanglePx2point(val.getKey().getAnchor(), 0, 0, 0, 0));
+            }
         });
     }
 
@@ -66,7 +71,7 @@ public class Tools {
     }
 
     public static Rectangle rectanglePx2point(Rectangle2D px) {
-        return _Help.rectanglePx2point(px, px.getX(), px.getY(), px.getWidth(), px.getHeight());
+        return rectanglePx2point(px, px.getX(), px.getY(), px.getWidth(), px.getHeight());
     }
 
     public static Rectangle2D delta(Rectangle2D px, double x, double y, double w, double h) {
@@ -74,7 +79,7 @@ public class Tools {
     }
 
     public static Rectangle rectanglePx2point(Rectangle2D px, double x, double y, double w, double h) {
-        return _Help.rectanglePx2point(px, x, y, w, h);
+        return rectanglePx2point(px, x, y, w, h);
     }
 
     public static void setTextShapeWithStyle(XSLFTextShape item, String val) {
@@ -145,7 +150,8 @@ public class Tools {
         return newPg;
     }
 
-    public static void setRadarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]... values) {
+    public static void setRadarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]...
+            values) {
         int size = categories.length;
         List<XDDFChartData> s = chart.getChartSeries();
         XDDFChartData bar = s.get(0);

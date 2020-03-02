@@ -9,12 +9,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface SearchContent {
+public abstract class SearchContent {
 
     //public static final Pattern PATTERN = Pattern.compile("\\$\\{[0-9]+(,[a-zA-Z]+(,.*+)?)?\\}");
     public static final Logger logger = LoggerFactory.getLogger(SearchContent.class);
-
-    List<ReplaceExpress> search();
 
     public static List<ReplaceExpress> searchExpress(XSLFTextParagraph run) {
         String pattern = run.getText();

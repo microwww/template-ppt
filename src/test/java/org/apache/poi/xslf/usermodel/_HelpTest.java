@@ -1,5 +1,6 @@
 package org.apache.poi.xslf.usermodel;
 
+import com.github.microwww.ttp.util.BiConsumer;
 import com.github.microwww.ttp.util._Help;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Assert;
@@ -57,9 +58,11 @@ public class _HelpTest {
 
         target.createSlide().importContent(template.getSlides().get(0));
 
-        XSLFSlide slide = target.createSlide();
-        XSLFChart chart = _Help.copyChart(template.getSlides().get(0), 0, slide, (c, val) -> {
-            slide.addChart(c, _Help.rectanglePx2point(val.getGraphic().getAnchor(), 0, 0, 0, 0));
+        final XSLFSlide slide = target.createSlide();
+        XSLFChart chart = _Help.copyChart(template.getSlides().get(0), 0, slide, new BiConsumer<XSLFChart, XSLFGraphicChart>() {
+            public void accept(XSLFChart c, XSLFGraphicChart val) {
+                slide.addChart(c, _Help.rectanglePx2point(val.getGraphic().getAnchor(), 0, 0, 0, 0));
+            }
         });
         Assert.assertNotNull(chart);
 
