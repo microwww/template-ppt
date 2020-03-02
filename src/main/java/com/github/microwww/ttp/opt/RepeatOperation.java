@@ -15,15 +15,10 @@ import java.util.Stack;
 
 public class RepeatOperation extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(DeleteOperation.class);
-    private static final ThreadLocal<Stack<Object>> local = new ThreadLocal<>();
 
     @Override
     public void parse(ParseContext context) {
-        List<Stack<Object>> search = super.searchStack(context);
-        for (Stack<Object> item : search) {
-            local.set(item);
-            thisInvoke("copy", context, item.peek());
-        }
+        super.parse(context, "copy");
     }
 
     public void copy(ParseContext context, Object o) {
@@ -72,7 +67,7 @@ public class RepeatOperation extends Operation {
     }
 
     public void copy(ParseContext context, XSLFTableRow row) {
-        Stack<Object> stack = local.get();
+        Stack<Object> stack = context.getContainer();
         XSLFTable table = (XSLFTable) stack.get(stack.size() - 2);
         // XSLFTable table = (XSLFTable) context.getContainer().peek();
         //XSLFTable table = DeleteOperation.getTable(context.getTemplate(), row);

@@ -97,6 +97,11 @@ public class Tools {
         CTTextParagraph xml = paragraph.getXmlObject();
         StringBuffer buffer = new StringBuffer();
         List<CTRegularTextRun> runs = xml.getRList();
+        if (runs.isEmpty()) {
+            log.debug("Not find run . set some text is good !");
+            xml.addNewR().setT("-");
+            runs = paragraph.getXmlObject().getRList();
+        }
         for (CTRegularTextRun rText : runs) {
             buffer.append(rText.getT());
         }
