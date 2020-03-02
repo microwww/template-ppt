@@ -22,7 +22,7 @@ public abstract class Operation {
 
     private static final Logger logger = LoggerFactory.getLogger(Operation.class);
 
-    private OgnlContext context = new OgnlContext(new DefaultClassResolver(), new DefaultTypeConverter(),
+    private static final OgnlContext context = new OgnlContext(new DefaultClassResolver(), new DefaultTypeConverter(),
             new DefaultMemberAccess(true));
 
     private String prefix;
@@ -33,6 +33,22 @@ public abstract class Operation {
     protected Operation parentOperations;
 
     public abstract void parse(ParseContext context);
+
+    public void parse(ParseContext context, String method) {
+        Stack<Object> container = context.getContainer();
+        List<Object> origin = new ArrayList<>(container);
+        try {
+            List<Stack<Object>> search = this.searchStack(context);
+            for (Stack<Object> item : search) {
+                container.clear();
+                container.addAll(item);
+                thisInvoke(method, context, item.peek());
+            }
+        } finally {
+            container.clear();
+            container.addAll(origin);
+        }
+    }
 
     public String[] getNode() {
         return node;
