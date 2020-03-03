@@ -129,20 +129,10 @@ public class CopyOperation extends Operation {
         } catch (RuntimeException e) {// ignore
             throw new RuntimeException("FIRST param is list/array !", e);
         }
-        String[] ps = param[1].split(",");
-        Assert.isTrue(ps.length == 2, "Repeat position.split(',') != 2");
-        List<XSLFTable> shapes = createTables(sheet, table, data);
+        List<XSLFTable> shapes = createTables(context, table, data);
         for (int k = 0; k < data.size(); k++) {
             int i = (k + 1) % data.size(); // 模板放到最后
             XSLFTable target = shapes.get(i);
-
-            Rectangle2D anchor = target.getAnchor();
-            //anchor = _Help.rectanglePx2point(anchor, 0,0,0,0);
-            double x = Double.valueOf(ps[0]).doubleValue() * (i);
-            double y = Double.valueOf(ps[1]).doubleValue() * (i);
-            Rectangle2D.Double r2d = new Rectangle2D.Double(anchor.getX() + x, anchor.getY() + y, anchor.getWidth() + x, anchor.getHeight() + y);
-            //anchor.add(0, i * 2);
-            target.setAnchor(r2d);
 
             RepeatDomain info = new RepeatDomain();
             info.setItem(data.get(i));
@@ -151,10 +141,20 @@ public class CopyOperation extends Operation {
         }
     }
 
-    protected List<XSLFTable> createTables(XSLFSheet sheet, XSLFTable table, List<Object> data) {
+    protected List<XSLFTable> createTables(ParseContext context, XSLFTable table, List<Object> data) {
+        XSLFSheet sheet = context.getTemplate();
+        String[] ps = this.getParams()[1].split(",");
+        Assert.isTrue(ps.length == 2, "Copy position.split(',') != 2");
         List<XSLFTable> shapes = new ArrayList<>();
         for (int i = 0; i < data.size(); i++) {
             XSLFTable target = Tools.copyTable(sheet, table);
+            Rectangle2D anchor = target.getAnchor();
+            //anchor = _Help.rectanglePx2point(anchor, 0,0,0,0);
+            double x = Double.valueOf(ps[0]).doubleValue() * (i + 1);
+            double y = Double.valueOf(ps[1]).doubleValue() * (i + 1);
+            Rectangle2D.Double r2d = new Rectangle2D.Double(anchor.getX() + x, anchor.getY() + y, anchor.getWidth() + x, anchor.getHeight() + y);
+            //anchor.add(0, i * 2);
+            target.setAnchor(r2d);
             shapes.add(target);
         }
         return shapes;

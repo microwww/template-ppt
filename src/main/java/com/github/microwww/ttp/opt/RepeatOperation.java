@@ -1,8 +1,10 @@
 package com.github.microwww.ttp.opt;
 
+import com.github.microwww.ttp.Assert;
 import com.github.microwww.ttp.Tools;
 import org.apache.poi.xslf.usermodel.*;
 
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,11 +50,21 @@ public class RepeatOperation extends CopyOperation {
     }
 
     @Override
-    protected List<XSLFTable> createTables(XSLFSheet sheet, XSLFTable table, List<Object> data) {
+    protected List<XSLFTable> createTables(ParseContext context, XSLFTable table, List<Object> data) {
         List<XSLFTable> shapes = new ArrayList<>();
         shapes.add(table);
+        XSLFSheet sheet = context.getTemplate();
+        String[] ps = this.getParams()[1].split(",");
+        Assert.isTrue(ps.length == 2, "Repeat position.split(',') != 2");
         for (int i = 1; i < data.size(); i++) {
             XSLFTable target = Tools.copyTable(sheet, table);
+            Rectangle2D anchor = target.getAnchor();
+            //anchor = _Help.rectanglePx2point(anchor, 0,0,0,0);
+            double x = Double.valueOf(ps[0]).doubleValue() * (i);
+            double y = Double.valueOf(ps[1]).doubleValue() * (i);
+            Rectangle2D.Double r2d = new Rectangle2D.Double(anchor.getX() + x, anchor.getY() + y, anchor.getWidth() + x, anchor.getHeight() + y);
+            //anchor.add(0, i * 2);
+            target.setAnchor(r2d);
             shapes.add(target);
         }
         return shapes;
