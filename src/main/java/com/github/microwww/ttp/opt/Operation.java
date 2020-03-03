@@ -307,8 +307,8 @@ public abstract class Operation {
     /**
      * support three format : 0,2,3 / 0-2,2-4 / 1-4,8-
      *
-     * @param index
-     * @return
+     * @param index format string
+     * @return range
      */
     public static List<Range> searchRanges(String index) {
         List<Range> list = new ArrayList<>();

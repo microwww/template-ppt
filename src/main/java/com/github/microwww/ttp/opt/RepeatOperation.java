@@ -106,23 +106,6 @@ public class RepeatOperation extends Operation {
         }
     }
 
-    /**
-     * public void repeat(ItemInfo item, String exp, XSLFTextShape cell) {
-     * ReplaceOperation rp = new ReplaceOperation();
-     * if (exp.equalsIgnoreCase("null")) {
-     * rp.setParams(new String[]{});
-     * } else {
-     * rp.setParams(new String[]{exp});
-     * }
-     * Stack<Object> origin = item.context.getDataStack();
-     * try {
-     * item.context.getDataStack().push(item);
-     * rp.replace(item.context, cell);
-     * } finally {
-     * item.context.getDataStack().pop();
-     * }
-     * }
-     **/
     public void copy(ParseContext context, XSLFTable table) {
         XSLFSheet sheet = context.getTemplate();
         String[] param = this.getParams();

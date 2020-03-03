@@ -92,7 +92,7 @@ public class _Help {
     }
 
     /**
-     * @param slide
+     * @param slide slide
      * @param index from 0
      * @return maybe null
      */
