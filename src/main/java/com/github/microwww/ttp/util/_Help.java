@@ -24,6 +24,22 @@ import java.util.List;
 
 public class _Help {
 
+    public static XSLFTable getTable(XSLFTableCell cell) {
+        try {
+            return (XSLFTable) FieldUtils.readDeclaredField(cell, "table", true);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public static XSLFTable getTable(XSLFTableRow row) {
+        try {
+            return (XSLFTable) FieldUtils.readDeclaredField(row, "_table", true);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     public static XSLFTable copyTable(XSLFSheet sheet, XSLFTable src) {
         XSLFTable dest = sheet.createTable();
         dest.getCTTable().set(src.getCTTable().copy());

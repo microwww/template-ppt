@@ -84,7 +84,7 @@ public class RepeatOperationTest {
         int size = table.getRows().size();
         context.setData(Collections.singletonMap("list", list));
 
-        RepeatOperation rep = new RepeatOperation();
+        CopyOperation rep = new CopyOperation();
         rep.setNode(new String[]{"XSLFTable", "0", "XSLFTableRow", "1"});
         rep.setParams(new String[]{"list", "null", "null", "null", "null", "item.name", "item.age", "index+1", "null", "null"});
         rep.parse(context);
@@ -121,7 +121,7 @@ public class RepeatOperationTest {
         context.setTemplate(slide);
         int size = ((XSLFTable) slide.getShapes().get(0)).getRows().size();
 
-        RepeatOperation rep = new RepeatOperation();
+        CopyOperation rep = new CopyOperation();
         rep.setNode(new String[]{"XSLFTable", "0", "XSLFTableRow", "1"});
         rep.setParams(new String[]{"'2'"});
         rep.parse(context);
@@ -144,7 +144,7 @@ public class RepeatOperationTest {
         //XSLFTable table = getTable(context, 1, 0);
         context.addData("list", Arrays.asList(new Group("亚洲", getDemoList()), new Group("欧洲", getDemoList()), new Group("非洲", getDemoList())));
 
-        RepeatOperation rep = new RepeatOperation();
+        CopyOperation rep = new CopyOperation();
         rep.setNode(new String[]{"XSLFTable", "0"});
         rep.setParams(new String[]{"list", "0,100"});
         {
@@ -154,7 +154,7 @@ public class RepeatOperationTest {
             rep.addChildrenOperation(rep2);
         }
         {
-            RepeatOperation rep2 = new RepeatOperation();
+            CopyOperation rep2 = new CopyOperation();
             rep2.setNode(new String[]{"XSLFTableRow", "1"});
             rep2.setParams(new String[]{"item.users"});
             rep.addChildrenOperation(rep2);

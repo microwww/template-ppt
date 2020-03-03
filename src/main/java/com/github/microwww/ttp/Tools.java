@@ -26,6 +26,14 @@ public class Tools {
         return _Help.copyTableRow(table, src);
     }
 
+    public static XSLFTable getTable(XSLFTableRow src) {
+        return _Help.getTable(src);
+    }
+
+    public static XSLFTable getTable(XSLFTableCell src) {
+        return _Help.getTable(src);
+    }
+
     public static XSLFAutoShape copyAutoShape(XSLFSheet sheet, XSLFAutoShape src) {
         XSLFAutoShape shape = sheet.createAutoShape();
         shape.getXmlObject().set(src.getXmlObject().copy());

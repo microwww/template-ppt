@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Stack;
 
-public class RepeatOperation extends Operation {
+public class CopyOperation extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(DeleteOperation.class);
 
     @Override
