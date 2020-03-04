@@ -144,9 +144,11 @@ public abstract class Operation {
             try {
                 return Ognl.getValue(express, context, models.get(i - 1));
             } catch (OgnlException e) {// ignore
+                logger.debug("Try OGNL error : {}", express, e);
             }
         }
-        throw new RuntimeException("OGNL express error : " + express);
+        throw new RuntimeException("OGNL express error : " + express + "."
+                + " SET logger : com.github.microwww.ttp.opt.Operation level to DEBUG , see more information");
     }
 
     public void tryParent(Stack<Object> models) {
