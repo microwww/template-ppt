@@ -3,6 +3,7 @@ package com.github.microwww.ttp.opt;
 import com.github.microwww.ttp.xslf.XSLFGraphicChart;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSheet;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,10 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ParseContext {
@@ -27,6 +25,7 @@ public class ParseContext {
 
     private final Stack<Object> container = new Stack<>();
     private final Stack<Object> data = new Stack<>();
+    private final List<XSLFSlide> origins = new ArrayList<>();
 
     public ParseContext(XMLSlideShow template) {
         container.add(template);
@@ -34,6 +33,11 @@ public class ParseContext {
             container.push(template.getSlides().get(0));
         }
         data.push(new HashMap<>());
+        origins.addAll(template.getSlides());
+    }
+
+    public List<XSLFSlide> getOrigins() {
+        return Collections.unmodifiableList(origins);
     }
 
     public XMLSlideShow getTemplateShow() {
@@ -84,11 +88,11 @@ public class ParseContext {
         return container;
     }
 
-    public ParseContext parse(InputStream format, Class<Operation>... support) throws IOException {
+    public ParseContext parse(InputStream format, Class<? extends Operation>... support) throws IOException {
         return this.parse(new InputStreamReader(format, "UTF-8"), support);
     }
 
-    public ParseContext parse(InputStreamReader format, Class<Operation>... support) throws IOException {
+    public ParseContext parse(InputStreamReader format, Class<? extends Operation>... support) throws IOException {
         ParseExpresses exp = new ParseExpresses().addSupportOperations(support);
         List<Operation> opts = exp.parse(format);
 
@@ -105,6 +109,7 @@ public class ParseContext {
 
     public void write(OutputStream out) throws IOException {
         this.getTemplateShow().write(out);
+        this.getTemplateShow().close();
     }
 
     public void putSupportShape(String name, Class clazz) {
