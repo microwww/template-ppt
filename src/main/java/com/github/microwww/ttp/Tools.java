@@ -2,6 +2,7 @@ package com.github.microwww.ttp;
 
 import com.github.microwww.ttp.util.BiConsumer;
 import com.github.microwww.ttp.util._Help;
+import com.github.microwww.ttp.xslf.XSLFGraphicChart;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xslf.usermodel.*;

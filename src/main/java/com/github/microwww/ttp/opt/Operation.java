@@ -4,6 +4,7 @@ import com.github.microwww.ttp.Assert;
 import com.github.microwww.ttp.util.DataUtil;
 import com.github.microwww.ttp.util.DefaultMemberAccess;
 import com.github.microwww.ttp.util._Help;
+import com.github.microwww.ttp.xslf.XSLFGraphicChart;
 import ognl.*;
 import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -204,7 +205,9 @@ public abstract class Operation {
     public List<Object> findElement(ParseContext context, XSLFSheet slide, String exp, String range) {
         List<Range> list = Operation.searchRanges(range);
         List<Object> res = new ArrayList<>();
-        if (XSLFChart.class.getSimpleName().equals(exp)) {
+
+        Class clazz = context.parseShapeClass(exp);
+        if (clazz.equals(XSLFChart.class)) {
             List<XSLFGraphicChart> charts = _Help.listCharts(slide);
             for (int i = 0; i < charts.size(); i++) {
                 for (Range rg : list) {
@@ -216,11 +219,19 @@ public abstract class Operation {
             }
         } else {
             int idx = 0;
-            String cname = "org.apache.poi.xslf.usermodel." + exp;
-            try {
-                Class clazz = Class.forName(cname);
-                if (XSLFSlide.class.equals(clazz)) {
-                    for (XSLFSlide shape : slide.getSlideShow().getSlides()) {
+            if (XSLFSlide.class.equals(clazz)) {
+                for (XSLFSlide shape : slide.getSlideShow().getSlides()) {
+                    for (Range rg : list) {
+                        if (rg.isIn(idx)) {
+                            res.add(shape);
+                            break;
+                        }
+                    }
+                    idx++;
+                }
+            } else {
+                for (XSLFShape shape : slide.getShapes()) {
+                    if (clazz.isInstance(shape)) {
                         for (Range rg : list) {
                             if (rg.isIn(idx)) {
                                 res.add(shape);
@@ -229,20 +240,7 @@ public abstract class Operation {
                         }
                         idx++;
                     }
-                } else
-                    for (XSLFShape shape : slide.getShapes()) {
-                        if (clazz.isInstance(shape)) {
-                            for (Range rg : list) {
-                                if (rg.isIn(idx)) {
-                                    res.add(shape);
-                                    break;
-                                }
-                            }
-                            idx++;
-                        }
-                    }
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Exception not support ! Must in package: org.apache.poi.xslf.usermodel", e);
+                }
             }
         }
         return res;

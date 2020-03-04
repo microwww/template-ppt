@@ -4,6 +4,7 @@ import com.github.microwww.ttp.Assert;
 import com.github.microwww.ttp.Tools;
 import com.github.microwww.ttp.replace.ReplaceExpress;
 import com.github.microwww.ttp.replace.SearchContent;
+import com.github.microwww.ttp.xslf.XSLFGraphicChart;
 import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFPieChartData;

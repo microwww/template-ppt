@@ -7,29 +7,32 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ParseExpresses {
 
-    private final InputStream inputStream;
-    private final List<Operation> operations = new ArrayList<>();
+    private final List<Class<? extends Operation>> supportOperations = new CopyOnWriteArrayList<>();
 
-    public ParseExpresses(File file) throws FileNotFoundException {
-        this.inputStream = new FileInputStream(file);
+    public ParseExpresses addSupportOperations(Class<? extends Operation>... supportOperations) {
+        this.supportOperations.addAll(Arrays.asList(supportOperations));
+        return this;
     }
 
-    public ParseExpresses(InputStream inputStream) {
-        this.inputStream = inputStream;
+    public List<Operation> parse(File input) throws IOException {
+        return this.parse(new InputStreamReader(new FileInputStream(input), "UTF-8"));
     }
 
-    public List<Operation> getOperations() {
-        return operations;
+    public List<Operation> parse(InputStream input) throws IOException {
+        return this.parse(new InputStreamReader(input, "UTF-8"));
     }
 
-    public void parse() throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+    public List<Operation> parse(InputStreamReader input) throws IOException {
+        List<Operation> operations = new ArrayList<>();
+        BufferedReader in = new BufferedReader(input);
         Operation upper = null;
         while (true) {
             String ln = in.readLine();
@@ -71,6 +74,7 @@ public class ParseExpresses {
             }
             upper = operation;
         }
+        return operations;
     }
 
     public Operation toOptions(String[] exps, String[] params) {
@@ -81,15 +85,14 @@ public class ParseExpresses {
             if (matcher.matches()) {
                 String exp = ex.substring(0, 1).toUpperCase() + ex.substring(1);
                 try {
-                    String name = this.getClass().getPackage().getName() + "." + exp + "Operation";
-                    Class<? extends Operation> clazz = (Class<? extends Operation>) Class.forName(name);
+                    Class<? extends Operation> clazz = parseOperationClass(exp);
                     Operation operation = clazz.getConstructor().newInstance();
                     operation.setPrefix(prefix);
                     operation.setNode(ArrayUtils.subarray(exps, i + 1, exps.length));
                     operation.setParams(params);
                     return operation;
-                } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    throw new UnsupportedOperationException("Not support type :: " + ex, e);
+                } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    throw new UnsupportedOperationException("Parse " + exp + " error. Operation class MUST has a no-params-constructor", e);
                 }
             } else {
                 if (prefix == null) {
@@ -99,5 +102,23 @@ public class ParseExpresses {
         }
         throw new UnsupportedOperationException(String.format("Not support type :: %s ( %s )",
                 StringUtils.join(exps, " "), StringUtils.join(params, " ")));
+    }
+
+    protected Class<? extends Operation> parseOperationClass(String exp) {
+        Class<? extends Operation> clazz = null;
+        for (Class<? extends Operation> opt : this.supportOperations) {
+            if (opt.getSimpleName().equals(exp + "Operation")) {
+                clazz = opt;
+            }
+        }
+        if (clazz == null) {
+            String name = this.getClass().getPackage().getName() + "." + exp + "Operation";
+            try {
+                clazz = (Class<? extends Operation>) Class.forName(name);
+            } catch (ClassNotFoundException e) {
+                throw new UnsupportedOperationException("Not support type :: " + exp + ", Type name must end with 'Operation'", e);
+            }
+        }
+        return clazz;
     }
 }

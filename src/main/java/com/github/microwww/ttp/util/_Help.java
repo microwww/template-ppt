@@ -1,5 +1,6 @@
 package com.github.microwww.ttp.util;
 
+import com.github.microwww.ttp.xslf.XSLFGraphicChart;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.poi.ooxml.POIXMLDocumentPart;

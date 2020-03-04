@@ -2,6 +2,7 @@ package org.apache.poi.xslf.usermodel;
 
 import com.github.microwww.ttp.util.BiConsumer;
 import com.github.microwww.ttp.util._Help;
+import com.github.microwww.ttp.xslf.XSLFGraphicChart;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Assert;
 import org.junit.Test;

@@ -1,4 +1,7 @@
-package org.apache.poi.xslf.usermodel;
+package com.github.microwww.ttp.xslf;
+
+import org.apache.poi.xslf.usermodel.XSLFChart;
+import org.apache.poi.xslf.usermodel.XSLFGraphicFrame;
 
 public class XSLFGraphicChart {
     private final XSLFGraphicFrame graphic;

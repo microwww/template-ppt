@@ -1,21 +1,29 @@
 package com.github.microwww.ttp.opt;
 
+import com.github.microwww.ttp.xslf.XSLFGraphicChart;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ParseContext {
     private static final Logger logger = LoggerFactory.getLogger(ParseContext.class);
+    private final Map<String, Class> supportShape = new ConcurrentHashMap<>();
+
+    {
+        Class<XSLFGraphicChart> clazz = XSLFGraphicChart.class;
+        supportShape.put(clazz.getSimpleName(), clazz);
+    }
 
     private final Stack<Object> container = new Stack<>();
     private final Stack<Object> data = new Stack<>();
@@ -76,10 +84,13 @@ public class ParseContext {
         return container;
     }
 
-    public void parse(InputStream format, OutputStream out) throws IOException {
-        ParseExpresses exp = new ParseExpresses(format);
-        exp.parse();
-        List<Operation> opts = exp.getOperations();
+    public ParseContext parse(InputStream format, Class<Operation>... support) throws IOException {
+        return this.parse(new InputStreamReader(format, "UTF-8"), support);
+    }
+
+    public ParseContext parse(InputStreamReader format, Class<Operation>... support) throws IOException {
+        ParseExpresses exp = new ParseExpresses().addSupportOperations(support);
+        List<Operation> opts = exp.parse(format);
 
         for (Operation opt : opts) {
             try {
@@ -89,7 +100,26 @@ public class ParseContext {
                 throw e;
             }
         }
+        return this;
+    }
 
+    public void write(OutputStream out) throws IOException {
         this.getTemplateShow().write(out);
+    }
+
+    public void putSupportShape(String name, Class clazz) {
+        supportShape.put(name, clazz);
+    }
+
+    public Class parseShapeClass(String exp) {
+        Class clazz = supportShape.get(exp);
+        if (clazz == null) {
+            String cname = "org.apache.poi.xslf.usermodel." + exp;
+            try {
+                return Class.forName(cname);
+            } catch (ClassNotFoundException e) {// IGNORE
+            }
+        }
+        throw new UnsupportedOperationException("Not support type : " + exp);
     }
 }
