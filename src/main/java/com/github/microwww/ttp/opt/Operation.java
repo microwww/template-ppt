@@ -149,7 +149,7 @@ public abstract class Operation {
             }
         }
         throw new RuntimeException("OGNL express error : " + express + "."
-                + " SET logger : com.github.microwww.ttp.opt.Operation level to DEBUG , see more information");
+                + " SET logger : " + logger.getName() + " level to DEBUG , see more information");
     }
 
     public void tryParent(Stack<Object> models) {
