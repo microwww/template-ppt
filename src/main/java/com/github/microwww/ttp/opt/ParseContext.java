@@ -118,12 +118,13 @@ public class ParseContext {
 
     public Class parseShapeClass(String exp) {
         Class clazz = supportShape.get(exp);
-        if (clazz == null) {
-            String cname = "org.apache.poi.xslf.usermodel." + exp;
-            try {
-                return Class.forName(cname);
-            } catch (ClassNotFoundException e) {// IGNORE
-            }
+        if (clazz != null) {
+            return clazz;
+        }
+        String cname = "org.apache.poi.xslf.usermodel." + exp;
+        try {
+            return Class.forName(cname);
+        } catch (ClassNotFoundException e) {// IGNORE
         }
         throw new UnsupportedOperationException("Not support type : " + exp);
     }
