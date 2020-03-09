@@ -3,9 +3,16 @@ package com.github.microwww.ttp;
 import com.github.microwww.ttp.util.BiConsumer;
 import com.github.microwww.ttp.util._Help;
 import com.github.microwww.ttp.xslf.XSLFGraphicChart;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xslf.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTRegularTextRun;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTextParagraph;
 import org.slf4j.Logger;
@@ -13,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 import java.util.List;
 
 public class Tools {
@@ -159,8 +167,21 @@ public class Tools {
         return newPg;
     }
 
-    public static void setRadarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]...
-            values) {
+    public static void setRadarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]... values) {
+        replaceChartData(chart, true, chartTitle, series, categories, values);
+    }
+
+    /**
+     * data not overflow the demo PPT series/categories is batter. if overflow, PPT data will not edit by EXCEL
+     *
+     * @param chart      XSLFChart to edit
+     * @param excel      allow to edit excel data
+     * @param chartTitle chart title
+     * @param series     series text
+     * @param categories category text
+     * @param values     value[series.length][categories.length]
+     */
+    public static void replaceChartData(XSLFChart chart, boolean excel, String chartTitle, String[] series, String[] categories, Double[]... values) {
         int size = categories.length;
         List<XDDFChartData> s = chart.getChartSeries();
         XDDFChartData bar = s.get(0);
@@ -170,39 +191,55 @@ public class Tools {
                 categories, categoryDataRange, 0);
 
         Assert.isTrue(series.length == values.length, "Error : series.length != values.length");
+        for (int i = bar.getSeriesCount(); i > 0; i--) {
+            bar.removeSeries(i - 1);
+        }
         for (int i = 0; i < series.length; i++) {
-            String valuesDataRange = chart.formatRange(new CellRangeAddress(1, size, i + 1, i + 1));
-            XDDFNumericalDataSource<? extends Number> valuesData = XDDFDataSourcesFactory.fromArray(values[i], valuesDataRange, 1);
-            List<XDDFChartData.Series> seriess = bar.getSeries();
-            XDDFChartData.Series ss;
-            if (seriess.size() > i) {
-                ss = seriess.get(i);
-                ss.replaceData(categoriesData, valuesData);
-            } else {
-                ss = bar.addSeries(categoriesData, valuesData);
-            }
-            ss.setTitle(series[i], chart.setSheetTitle(series[i], 1));
+            int column = i + 1;
+            String valuesDataRange = chart.formatRange(new CellRangeAddress(1, size, column, column));
+            XDDFNumericalDataSource<? extends Number> valuesData = XDDFDataSourcesFactory.fromArray(values[i], valuesDataRange, column);
+            XDDFChartData.Series ss = bar.addSeries(categoriesData, valuesData);
+            ss.setTitle(series[i], chart.setSheetTitle(series[i], column));
         }
 
         chart.plot(bar);
         chart.setTitleText(chartTitle); // https://stackoverflow.com/questions/30532612
+
+        if (!excel) {
+            return;
+        }
+        try { //  replace workbook data . if over max row / column, PPT not edit by EXCEL, AND unsupported to add row/column
+            XSSFSheet sheet = chart.getWorkbook().getSheetAt(0);
+            XSSFRow ss = sheet.getRow(0);
+            for (int i = 0; i < series.length; i++) {
+                XSSFCell cell = ss.getCell(i + 1);
+                if (cell != null) {
+                    cell.setCellValue(series[i]);
+                }
+            }
+            for (int i = 0; i < categories.length; i++) {
+                XSSFRow row = sheet.getRow(i + 1);
+                if (row == null) {
+                    row = sheet.createRow(i + 1);
+                }
+                XSSFCell first = row.getCell(0);
+                if (first != null) {
+                    first.setCellValue(categories[i]);
+                }
+                for (int j = 0; j < series.length; j++) {
+                    XSSFCell cell = row.getCell(j + 1);
+                    if (cell != null) {
+                        double v = values[j][i];
+                        cell.setCellValue(v);
+                    }
+                }
+            }
+        } catch (IOException | InvalidFormatException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void setPieDate(XSLFChart chart, String chartTitle, String[] categories, Double[] values) {
-        // Series Text
-        List<XDDFChartData> series = chart.getChartSeries();
-        XDDFPieChartData pie = (XDDFPieChartData) series.get(0);
-
-        int numOfPoints = categories.length;
-        String categoryDataRange = chart.formatRange(new CellRangeAddress(1, numOfPoints, 0, 0));
-        String valuesDataRange = chart.formatRange(new CellRangeAddress(1, numOfPoints, 1, 1));
-        XDDFDataSource<?> categoriesData = XDDFDataSourcesFactory.fromArray(categories, categoryDataRange);
-        XDDFNumericalDataSource<? extends Number> valuesData = XDDFDataSourcesFactory.fromArray(values, valuesDataRange);
-
-        XDDFPieChartData.Series firstSeries = (XDDFPieChartData.Series) pie.getSeries(0);
-        firstSeries.replaceData(categoriesData, valuesData);
-        firstSeries.setTitle(chartTitle, chart.setSheetTitle(chartTitle, 0));
-        // firstSeries.setExplosion(25);
-        chart.plot(pie);
+        replaceChartData(chart, false, chartTitle, new String[]{"SERIES"}, categories, values);
     }
 }
