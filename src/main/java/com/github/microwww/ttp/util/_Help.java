@@ -84,7 +84,7 @@ public class _Help {
         return copyChart(src, index, dest, new BiConsumer<XSLFChart, XSLFGraphicChart>() {
             @Override
             public void accept(XSLFChart c, XSLFGraphicChart v) {
-                Rectangle point = rectanglePx2point(v.getGraphic().getAnchor(), 0, 0, 0, 0);
+                Rectangle2D point = delta(v.getGraphic().getAnchor(), 0, 0, 0, 0);
                 dest.addChart(c, point);
             }
         });
@@ -170,7 +170,7 @@ public class _Help {
         throw new RuntimeException("Not find chart AT xpath : " + xpath);
     }
 
-    public static Rectangle rectanglePx2point(Rectangle2D px, double x, double y, double w, double h) {
-        return new Rectangle(Units.toEMU(px.getX() + x), Units.toEMU(px.getY() + y), Units.toEMU(px.getWidth() + w), Units.toEMU(px.getHeight() + h));
+    public static Rectangle2D delta(Rectangle2D px, double x, double y, double w, double h) {
+        return new Rectangle2D.Double(px.getX() + x, px.getY() + y, px.getWidth() + w, px.getHeight() + h);
     }
 }

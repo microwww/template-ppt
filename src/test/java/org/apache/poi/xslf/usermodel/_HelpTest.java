@@ -62,7 +62,7 @@ public class _HelpTest {
         final XSLFSlide slide = target.createSlide();
         XSLFChart chart = _Help.copyChart(template.getSlides().get(0), 0, slide, new BiConsumer<XSLFChart, XSLFGraphicChart>() {
             public void accept(XSLFChart c, XSLFGraphicChart val) {
-                slide.addChart(c, _Help.rectanglePx2point(val.getGraphic().getAnchor(), 0, 0, 0, 0));
+                slide.addChart(c, _Help.delta(val.getGraphic().getAnchor(), 0, 0, 0, 0));
             }
         });
         Assert.assertNotNull(chart);
