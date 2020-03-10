@@ -32,6 +32,10 @@ public class DeleteOperation extends Operation {
         }
     }
 
+    public void delete(ParseContext context, XSLFShape shape) {
+        context.getTemplate().removeShape(shape);
+    }
+
     public void delete(ParseContext context, XSLFTextParagraph paragraph) {
         XSLFTextShape shape = paragraph.getParentShape();
         List<XSLFTextParagraph> pgs = shape.getTextParagraphs();
