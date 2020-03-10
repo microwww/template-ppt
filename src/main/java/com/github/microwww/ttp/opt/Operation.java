@@ -120,15 +120,26 @@ public abstract class Operation {
         return content;
     }
 
+    public Object getValue(String express, Stack<Object> models) {
+        return this.getValue(express, models, null);
+    }
+
     public <T> T getValue(String express, Stack<Object> models, Class<T> clazz) {
         tryParent(models);
+        List<Throwable> exs = new ArrayList<>();
         for (int i = models.size(); i > 0; i--) {
             try {
                 return (T) Ognl.getValue(express, context, models.get(i - 1), clazz);
             } catch (OgnlException e) {// ignore
+                exs.add(e.getCause());
+                logger.debug("Try OGNL error : {}", express, e);
             }
         }
-        throw new RuntimeException("OGNL express error : " + express);
+        for (Throwable ex : exs) {
+            logger.error("OGNL Error ! ", ex);
+        }
+        throw new RuntimeException("OGNL express error : " + express + "."
+                + " SET logger : " + logger.getName() + " level to DEBUG , see more information");
     }
 
     public List getCollectionValue(String express, Stack<Object> model) {
@@ -137,19 +148,6 @@ public abstract class Operation {
             throw new RuntimeException("OGNL Express value is null, NOT list/array");
         }
         return DataUtil.toList(value);
-    }
-
-    public Object getValue(String express, Stack<Object> models) {
-        tryParent(models);
-        for (int i = models.size(); i > 0; i--) {
-            try {
-                return Ognl.getValue(express, context, models.get(i - 1));
-            } catch (OgnlException e) {// ignore
-                logger.debug("Try OGNL error : {}", express, e);
-            }
-        }
-        throw new RuntimeException("OGNL express error : " + express + "."
-                + " SET logger : " + logger.getName() + " level to DEBUG , see more information");
     }
 
     public void tryParent(Stack<Object> models) {
