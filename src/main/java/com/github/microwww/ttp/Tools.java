@@ -191,15 +191,23 @@ public class Tools {
                 categories, categoryDataRange, 0);
 
         Assert.isTrue(series.length == values.length, "Error : series.length != values.length");
-        for (int i = bar.getSeriesCount(); i > 0; i--) {
-            bar.removeSeries(i - 1);
-        }
+
         for (int i = 0; i < series.length; i++) {
             int column = i + 1;
             String valuesDataRange = chart.formatRange(new CellRangeAddress(1, size, column, column));
             XDDFNumericalDataSource<? extends Number> valuesData = XDDFDataSourcesFactory.fromArray(values[i], valuesDataRange, column);
-            XDDFChartData.Series ss = bar.addSeries(categoriesData, valuesData);
+            XDDFChartData.Series ss;
+            if (bar.getSeriesCount() > i) {
+                ss = bar.getSeries(i);
+                ss.replaceData(categoriesData, valuesData);
+            } else {
+                ss = bar.addSeries(categoriesData, valuesData);
+            }
             ss.setTitle(series[i], chart.setSheetTitle(series[i], column));
+        }
+
+        for (int i = bar.getSeriesCount(); i > series.length; i--) {
+            bar.removeSeries(i - 1);
         }
 
         chart.plot(bar);
@@ -240,6 +248,6 @@ public class Tools {
     }
 
     public static void setPieDate(XSLFChart chart, String chartTitle, String[] categories, Double[] values) {
-        replaceChartData(chart, false, chartTitle, new String[]{"SERIES"}, categories, values);
+        replaceChartData(chart, true, chartTitle, new String[]{"PIE-SERIES"}, categories, values);
     }
 }
