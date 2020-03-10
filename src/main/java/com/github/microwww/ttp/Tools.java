@@ -4,15 +4,14 @@ import com.github.microwww.ttp.util.BiConsumer;
 import com.github.microwww.ttp.util._Help;
 import com.github.microwww.ttp.xslf.XSLFGraphicChart;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
 import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xslf.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.*;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTRegularTextRun;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTextParagraph;
 import org.slf4j.Logger;
@@ -20,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -167,21 +168,30 @@ public class Tools {
         return newPg;
     }
 
+    /**
+     * replace with this.replaceChartData(...)
+     *
+     * @param chart
+     * @param chartTitle
+     * @param series
+     * @param categories
+     * @param values
+     */
+    @Deprecated
     public static void setRadarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]... values) {
-        replaceChartData(chart, true, chartTitle, series, categories, values);
+        replaceChartData(chart, chartTitle, series, categories, values);
     }
 
     /**
      * data not overflow the demo PPT series/categories is batter. if overflow, PPT data will not edit by EXCEL
      *
      * @param chart      XSLFChart to edit
-     * @param excel      allow to edit excel data
      * @param chartTitle chart title
      * @param series     series text
      * @param categories category text
      * @param values     value[series.length][categories.length]
      */
-    public static void replaceChartData(XSLFChart chart, boolean excel, String chartTitle, String[] series, String[] categories, Double[]... values) {
+    public static void replaceChartData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]... values) {
         int size = categories.length;
         List<XDDFChartData> s = chart.getChartSeries();
         XDDFChartData bar = s.get(0);
@@ -210,17 +220,22 @@ public class Tools {
             bar.removeSeries(i - 1);
         }
 
+        replaceExcel(chart, series, categories, values);
+
         chart.plot(bar);
         chart.setTitleText(chartTitle); // https://stackoverflow.com/questions/30532612
+    }
 
-        if (!excel) {
-            return;
-        }
+    private static void replaceExcel(XSLFChart chart, String[] series, String[] categories, Double[][] values) {
         try { //  replace workbook data . if over max row / column, PPT not edit by EXCEL, AND unsupported to add row/column
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            chart.getWorkbook().write(stream);
+            XSSFWorkbook workbook = (XSSFWorkbook) XSSFWorkbookFactory.create(new ByteArrayInputStream(stream.toByteArray()));
+            chart.setWorkbook(workbook);
             XSSFSheet sheet = chart.getWorkbook().getSheetAt(0);
             XSSFRow ss = sheet.getRow(0);
             for (int i = 0; i < series.length; i++) {
-                XSSFCell cell = ss.getCell(i + 1);
+                XSSFCell cell = ss.getCell(i + 1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                 if (cell != null) {
                     cell.setCellValue(series[i]);
                 }
@@ -230,12 +245,12 @@ public class Tools {
                 if (row == null) {
                     row = sheet.createRow(i + 1);
                 }
-                XSSFCell first = row.getCell(0);
+                XSSFCell first = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                 if (first != null) {
                     first.setCellValue(categories[i]);
                 }
                 for (int j = 0; j < series.length; j++) {
-                    XSSFCell cell = row.getCell(j + 1);
+                    XSSFCell cell = row.getCell(j + 1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                     if (cell != null) {
                         double v = values[j][i];
                         cell.setCellValue(v);
@@ -248,6 +263,6 @@ public class Tools {
     }
 
     public static void setPieDate(XSLFChart chart, String chartTitle, String[] categories, Double[] values) {
-        replaceChartData(chart, true, chartTitle, new String[]{"PIE-SERIES"}, categories, values);
+        replaceChartData(chart, chartTitle, new String[]{"PIE-SERIES"}, categories, values);
     }
 }
