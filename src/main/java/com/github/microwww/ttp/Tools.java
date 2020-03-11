@@ -196,6 +196,9 @@ public class Tools {
         List<XDDFChartData> s = chart.getChartSeries();
         XDDFChartData bar = s.get(0);
 
+        // THIS IS A trouble
+        Assert.isTrue(bar.getSeriesCount() >= series.length, "ERROR ! Template series count >= replace.data.series count, THIS IS A restricted");
+
         String categoryDataRange = chart.formatRange(new CellRangeAddress(1, size, 0, 0));
         XDDFDataSource<String> categoriesData = XDDFDataSourcesFactory.fromArray(//
                 categories, categoryDataRange, 0);
@@ -239,7 +242,6 @@ public class Tools {
             Assert.isTrue(head != null, "SHEET row 0 must have DATA .");
             for (int i = 0; i < series.length; i++) {
                 XSSFCell cell = head.getCell(i + 1);
-                Assert.isTrue(head != null, "TEMPLATE column count (series-count) >= data.series.length .");
                 if (cell != null) {
                     cell.setCellValue(series[i]);
                 }
