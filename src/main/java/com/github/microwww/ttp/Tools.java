@@ -184,7 +184,7 @@ public class Tools {
 
     /**
      * data not overflow the demo PPT series/categories is batter. if overflow, PPT data will not edit by EXCEL.
-     * demo PPT series size must >= data.series size , this is a restricted !
+     * demo PPT series size must &gt;= data.series size , this is a restricted !
      *
      * @param chart      XSLFChart to edit
      * @param chartTitle chart title
