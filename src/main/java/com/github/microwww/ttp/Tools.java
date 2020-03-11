@@ -216,6 +216,7 @@ public class Tools {
             ss.setTitle(series[i], chart.setSheetTitle(series[i], column));
         }
 
+        //DELETE overflow series
         for (int i = bar.getSeriesCount(); i > series.length; i--) {
             bar.removeSeries(i - 1);
         }
@@ -233,9 +234,12 @@ public class Tools {
             XSSFWorkbook workbook = (XSSFWorkbook) XSSFWorkbookFactory.create(new ByteArrayInputStream(stream.toByteArray()));
             chart.setWorkbook(workbook);
             XSSFSheet sheet = chart.getWorkbook().getSheetAt(0);
-            XSSFRow ss = sheet.getRow(0);
+            Assert.isTrue(sheet != null, "Must has sheet ! Template PPTX can be EDIT by micro-soft-office.");
+            XSSFRow head = sheet.getRow(0);
+            Assert.isTrue(head != null, "SHEET row 0 must have DATA .");
             for (int i = 0; i < series.length; i++) {
-                XSSFCell cell = ss.getCell(i + 1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                XSSFCell cell = head.getCell(i + 1);
+                Assert.isTrue(head != null, "TEMPLATE column count (series-count) >= data.series.length .");
                 if (cell != null) {
                     cell.setCellValue(series[i]);
                 }
@@ -255,6 +259,28 @@ public class Tools {
                         double v = values[j][i];
                         cell.setCellValue(v);
                     }
+                }
+            }
+            // delete overflow column
+            if (false) { //  not delete column
+                for (int i = 0; i <= categories.length; i++) {
+                    XSSFRow row = sheet.getRow(i);
+                    if (row != null) {
+                        for (int j = row.getLastCellNum() - 1; j > series.length; j--) {// from end to start
+                            XSSFCell cell = row.getCell(j);
+                            if (cell != null) {
+                                //row.removeCell(cell); // cell.setBlank();
+                                log.debug("TODO:: delete OR setBlank will do not EDIT BY PPT");
+                            }
+                        }
+                    }
+                }
+            }
+            // delete overflow row
+            for (int i = sheet.getLastRowNum() - 1; i > categories.length; i--) {
+                XSSFRow row = sheet.getRow(i);
+                if (row != null) {
+                    sheet.removeRow(row);
                 }
             }
         } catch (IOException | InvalidFormatException e) {
