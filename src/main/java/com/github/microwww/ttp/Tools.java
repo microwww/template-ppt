@@ -171,11 +171,11 @@ public class Tools {
     /**
      * replace with this.replaceChartData(...)
      *
-     * @param chart
-     * @param chartTitle
-     * @param series
-     * @param categories
-     * @param values
+     * @param chart      target chart
+     * @param chartTitle title
+     * @param series     series-data first row titles, B1,C1,D1 .... (skip fist, A1)
+     * @param categories categories data, first column, A2,A3,A4,A5 (skip first, A1)
+     * @param values     value[series.length][categories.length]
      */
     @Deprecated
     public static void setRadarData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]... values) {
@@ -183,12 +183,13 @@ public class Tools {
     }
 
     /**
-     * data not overflow the demo PPT series/categories is batter. if overflow, PPT data will not edit by EXCEL
+     * data not overflow the demo PPT series/categories is batter. if overflow, PPT data will not edit by EXCEL.
+     * demo PPT series size must >= data.series size , this is a restricted !
      *
      * @param chart      XSLFChart to edit
      * @param chartTitle chart title
-     * @param series     series text
-     * @param categories category text
+     * @param series     series-data first row titles, B1,C1,D1 .... (skip fist, A1)
+     * @param categories categories data, first column, A2,A3,A4,A5 (skip first, A1)
      * @param values     value[series.length][categories.length]
      */
     public static void replaceChartData(XSLFChart chart, String chartTitle, String[] series, String[] categories, Double[]... values) {
