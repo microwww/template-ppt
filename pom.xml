@@ -47,7 +47,7 @@
 
     <groupId>com.github.microwww</groupId>
     <artifactId>template-ppt</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5-release</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
