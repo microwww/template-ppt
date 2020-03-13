@@ -133,10 +133,13 @@ public abstract class Operation {
             } catch (OgnlException e) {// ignore
                 exs.add(e.getCause());
                 logger.debug("Try OGNL error : {}", express, e);
+            } catch (Exception e) {
+                exs.add(e);
+                break;
             }
         }
         for (Throwable ex : exs) {
-            logger.error("OGNL Error ! ", ex);
+            logger.error("OGNL ERROR : {}", express, ex);
         }
         throw new RuntimeException("OGNL express error : " + express + "."
                 + " SET logger : " + logger.getName() + " level to DEBUG , see more information");
