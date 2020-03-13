@@ -132,7 +132,6 @@ public abstract class Operation {
                 return (T) Ognl.getValue(express, context, models.get(i - 1), clazz);
             } catch (OgnlException e) {// ignore
                 exs.add(e.getCause());
-                logger.debug("Try OGNL error : {}", express, e);
             } catch (Exception e) {
                 exs.add(e);
                 break;
@@ -141,8 +140,7 @@ public abstract class Operation {
         for (Throwable ex : exs) {
             logger.error("OGNL ERROR : {}", express, ex);
         }
-        throw new RuntimeException("OGNL express error : " + express + "."
-                + " SET logger : " + logger.getName() + " level to DEBUG , see more information");
+        throw new RuntimeException("OGNL express error, there are more information at up");
     }
 
     public List getCollectionValue(String express, Stack<Object> model) {
