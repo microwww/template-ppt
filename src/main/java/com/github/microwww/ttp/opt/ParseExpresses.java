@@ -34,6 +34,7 @@ public class ParseExpresses {
         List<Operation> operations = new ArrayList<>();
         BufferedReader in = new BufferedReader(input);
         Operation upper = null;
+        StringBuffer buffer = new StringBuffer();
         while (true) {
             String ln = in.readLine();
             if (ln == null) {
@@ -42,6 +43,13 @@ public class ParseExpresses {
             ln = ln.trim();
             if (ln.length() == 0 || ln.startsWith("#")) {
                 continue;
+            }
+            if (ln.endsWith("\\")) {
+                buffer.append(ln.substring(0, ln.length() - 1));
+                continue;
+            } else if (buffer.length() > 0) {
+                ln = buffer.toString();
+                buffer.setLength(0);
             }
             String[] exps, params = new String[]{};
             if (ln.endsWith(")")) {
